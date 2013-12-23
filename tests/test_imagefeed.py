@@ -1,4 +1,4 @@
-from capuchin.imagefeed import ImageFeed
+from capuchin.capuchin.imagefeed import ImageFeed
 
 class TestImageFeed:
     

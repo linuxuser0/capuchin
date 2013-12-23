@@ -1,5 +1,5 @@
-from capuchin.imprinter import Imprinter
-from capuchin.imagefeed import ImageFeed
+from capuchin.capuchin.imprinter import Imprinter
+from capuchin.capuchin.imagefeed import ImageFeed
 
 class TestImprinter:
 
@@ -11,7 +11,8 @@ class TestImprinter:
         assert self.imprinter != None
 
     def test_imprinter_imprints(self):
-        assert self.imprinter.imprint() != None
+        test_images = self.imagefeed.feed()
+        assert self.imprinter.imprint(test_images) != None
 
     def test_imprinter_imagefeed_exists(self):
         assert self.imprinter.imagefeed != None
@@ -19,3 +20,5 @@ class TestImprinter:
     def test_imprinter_imagefeed_feeds_images(self):
         assert self.imprinter.imagefeed.feed() != None
 
+    def test_imprinter_feeds_and_imprints(self):
+        assert self.imprinter.feed_and_imprint() != None
