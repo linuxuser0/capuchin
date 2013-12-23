@@ -8,17 +8,17 @@ class TestImprinter:
         self.imprinter = Imprinter(self.imagefeed)
 
     def test_imprinter_exists(self):
-        assert self.imprinter != None
+        assert self.imprinter is not None
 
     def test_imprinter_imprints(self):
         test_images = self.imagefeed.feed()
-        assert self.imprinter.imprint(test_images) != None
+        assert self.imprinter.imprint(test_images) is None
 
     def test_imprinter_imagefeed_exists(self):
-        assert self.imprinter.imagefeed != None
+        assert self.imprinter.imagefeed is not None
 
     def test_imprinter_imagefeed_feeds_images(self):
-        assert self.imprinter.imagefeed.feed() != None
+        assert self.imprinter.imagefeed.feed() is not None
 
     def test_imprinter_feeds_and_imprints(self):
-        assert self.imprinter.feed_and_imprint() != None
+        assert self.imprinter.feed_and_imprint() is None
