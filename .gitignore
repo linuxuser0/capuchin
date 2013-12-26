@@ -6,5 +6,5 @@ dist/
 lib/
 var/
 
-data/
-corpus/
+feed/*
+corpus/*
