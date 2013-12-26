@@ -16,7 +16,7 @@ class ImageFeed:
     def train(self, exp, fraction):
         pass
 
-    def feed(self, image_package_size=10):
+    def feed(self, image_package_size=10): #TODO: make unsupervised
         """Get image_package_size images from each subdirectory in image_location and return them.""" 
 
         self._reset_feed()
@@ -26,7 +26,7 @@ class ImageFeed:
 
         for image in image_subdirs:
             image_file = os.path.join(self.image_location, image_subdirs[image], image) 
-            destination = os.path.join(self.feed_location, image_subdirs[image])
+            destination = os.path.join(self.feed_location, image_subdirs[image], image)
             shutil.copyfile(image_file, destination)
 
             self.used_images.append(image)
@@ -46,8 +46,6 @@ class ImageFeed:
             subdir_unused_images = [ image for image in all_images if image not in self.used_images ]
             unused_images[subdirectory] = subdir_unused_images
 
-        print unused_images
-
         return unused_images
 
     def _get_random_image_sample(self, size):
@@ -63,7 +61,11 @@ class ImageFeed:
         return images
 
     def _reset_feed(self):
-       shutil.rmtree(self.feed_location)
-       os.makedirs(self.feed_location)
+        shutil.rmtree(self.feed_location)
+        os.makedirs(self.feed_location)
+        for subdir in os.listdir(self.image_location):
+            full_path = os.path.join(self.feed_location, subdir)
+            os.makedirs(full_path)
+
 
 
