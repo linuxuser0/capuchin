@@ -5,8 +5,8 @@ from config import *
 class TestImprinter:
 
     def setUp(self):
-        self.imagefeed = ImageFeed(feed_location = TEST_FEED_LOCATION)
-        self.imprinter = Imprinter(feed_location = TEST_FEED_LOCATION)
+        self.imagefeed = ImageFeed(TEST_CORPUS_LOCATION, TEST_FEED_LOCATION)
+        self.imprinter = Imprinter(self.imagefeed)
 
     def test_imprinter_exists(self):
         assert self.imprinter is not None

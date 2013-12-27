@@ -4,11 +4,12 @@ import random
 
 class ImageFeed:
     """Feeds images to feed_location to simulate a real-time image feed for Imprinter instances."""
-    CURRENT_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
-    DEFAULT_IMAGE_LOCATION = os.path.join(CURRENT_DIRECTORY, "data", "corpus")
+
+    #CURRENT_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
+    #DEFAULT_IMAGE_LOCATION = os.path.join(CURRENT_DIRECTORY, "data", "corpus")
     ACCEPTED_FILETYPES = ['.png', '.jpg', '.jpeg']
 
-    def __init__(self, image_location=DEFAULT_IMAGE_LOCATION, feed_location=None):
+    def __init__(self, image_location, feed_location):
         self.image_location = image_location 
         self.used_images = []
         self.feed_location = feed_location
@@ -61,7 +62,10 @@ class ImageFeed:
         return images
 
     def _reset_feed(self):
-        shutil.rmtree(self.feed_location)
+        try:
+            shutil.rmtree(self.feed_location)
+        except OSError:
+            pass
         os.makedirs(self.feed_location)
         for subdir in os.listdir(self.image_location):
             full_path = os.path.join(self.feed_location, subdir)

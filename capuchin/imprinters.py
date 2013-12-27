@@ -10,20 +10,19 @@ class Imprinter:
     CURRENT_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
     DEFAULT_FEED_LOCATION= os.path.join(CURRENT_DIRECTORY, "data", "feed")
 
-    def __init__(self, feed_location):
-        self.imagefeed = ImageFeed() 
-        self.feed_location = feed_location
-        self.imagefeed.feed_location = feed_location
+    def __init__(self, imagefeed, initial_image_count=2):
+        self.imagefeed = imagefeed 
+        self.initial_image_count = initial_image_count
         self.exp = ExperimentData()
         self.pool = MakePool('s')
         self._initial_imprint()
         
 
     def _initial_imprint(self):
-        self.imagefeed.feed(50) #TODO: change to variable!
-        SetCorpus(self.exp, self.feed_location)
+        self.imagefeed.feed(self.initial_image_count) 
+        SetCorpus(self.exp, self.imagefeed.feed_location)
         SetModel(self.exp, model=MakeModel())
-        self.imprint() #bug is here
+        self.imprint() 
                 
 
     def imprint(self):
