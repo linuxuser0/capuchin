@@ -11,7 +11,7 @@ class StaticMonkey:
         self.prototypes = None 
         
     def run(self): 
-        new_prototypes = self.imprinter.imprint() 
+        new_prototypes = self.imprinter.feed_and_imprint() 
         if self.prototypes is None:
             self.prototypes = new_prototypes
         else:

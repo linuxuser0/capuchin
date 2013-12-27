@@ -2,39 +2,42 @@ import os
 import shutil
 import random
 
+from glimpse.experiment import *
+
 class ImageFeed:
     """Feeds images to feed_location to simulate a real-time image feed for Imprinter instances."""
 
-    #CURRENT_DIRECTORY = os.path.dirname(os.path.realpath(__file__))
-    #DEFAULT_IMAGE_LOCATION = os.path.join(CURRENT_DIRECTORY, "data", "corpus")
     ACCEPTED_FILETYPES = ['.png', '.jpg', '.jpeg']
 
-    def __init__(self, image_location, feed_location):
+    def __init__(self, image_location, root_feed_location):
         self.image_location = image_location 
         self.used_images = []
-        self.feed_location = feed_location
+        self.feed_location = os.path.join(root_feed_location, "feed")
 
-    def train(self, exp, fraction):
-        pass
-
-    def feed(self, image_package_size=10): #TODO: make unsupervised
+    def feed(self, image_package_size): 
         """Get image_package_size images from each subdirectory in image_location and return them.""" 
-
-        self._reset_feed()
-
+        self._reset_directory(self.feed_location)
         image_subdirs = self._get_random_image_sample(image_package_size)
+        images = self._transfer_images(image_subdirs, self.feed_location) 
+        return images 
+
+            
+    def _transfer_images(self, image_subdirs, location):
         image_files = []
+        self._reset_directory(location)
 
         for image in image_subdirs:
             image_file = os.path.join(self.image_location, image_subdirs[image], image) 
-            destination = os.path.join(self.feed_location, image_subdirs[image], image)
+            destination = os.path.join(location, image_subdirs[image], image) 
+            print "IMAGE: %s. DESTINATION: %s" % (image_file, destination)
             shutil.copyfile(image_file, destination)
 
             self.used_images.append(image)
             image_files.append(image)
         
         return image_files
-    
+
+
     def _get_unused_images(self):
         """Get a dictionary of all available images which haven't been used."""
         subdirectories = os.listdir(self.image_location)
@@ -53,23 +56,32 @@ class ImageFeed:
         """Gets a random sample of images of size from each subdirectory in image_location, returning a dictionary."""
         images = {}
         unused_images = self._get_unused_images()
+
+        print unused_images
         
         for subdirectory in unused_images: 
             subdir_images = random.sample(unused_images[subdirectory], size) 
-            for image in subdir_images: 
-                images[image] = subdirectory
+            for image in subdir_images:
+                images[image] = subdirectory 
 
         return images
 
-    def _reset_feed(self):
+    def _reset_directory(self, directory):
         try:
-            shutil.rmtree(self.feed_location)
+            shutil.rmtree(directory)
         except OSError:
             pass
-        os.makedirs(self.feed_location)
+        os.makedirs(directory)
         for subdir in os.listdir(self.image_location):
-            full_path = os.path.join(self.feed_location, subdir)
+            full_path = os.path.join(directory, subdir)
             os.makedirs(full_path)
 
+    def _get_predictions(self, exp, location):
+        print exp
+        SetCorpus(exp, location)  
+        raw_predictions = GetPredictions(exp)
+        predictions = {pred[0] : pred[2] for pred in raw_predictions}
+        print predictions
+        return predictions
 
 
