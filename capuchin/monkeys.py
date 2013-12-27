@@ -1,3 +1,4 @@
+import numpy
 from imprinters import Imprinter
 from imagefeeds import ImageFeed
 
@@ -5,13 +6,16 @@ from imagefeeds import ImageFeed
 
 class StaticMonkey:
     
-    DEFAULT_WINDOW_SIZE = 5
-
     def __init__(self, imprinter): 
         self.imprinter = imprinter 
+        self.prototypes = None 
         
-    def run(self):
-        """Imprint using self.imprinter and record results and resultant visual cells, returning results."""
-
+    def run(self): 
+        new_prototypes = self.imprinter.imprint() 
+        if self.prototypes is None:
+            self.prototypes = new_prototypes
+        else:
+            self.prototypes = numpy.concatenate((self.prototypes, new_prototypes))
+        return self.prototypes
         
          
