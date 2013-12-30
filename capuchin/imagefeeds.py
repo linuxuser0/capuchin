@@ -12,14 +12,14 @@ class ImageFeed:
     def __init__(self, image_location, root_feed_location):
         self.image_location = image_location 
         self.used_images = []
-        self.feed_location = os.path.join(root_feed_location, "feed")
+        self.feed_location = root_feed_location # TODO consolidate variables 
 
     def feed(self, image_package_size): 
         """Get image_package_size images from each subdirectory in image_location and return them.""" 
         self._reset_directory(self.feed_location)
         image_subdirs = self._get_random_image_sample(image_package_size)
         images = self._transfer_images(image_subdirs, self.feed_location) 
-        return images 
+        return image_subdirs 
 
             
     def _transfer_images(self, image_subdirs, location):
@@ -29,7 +29,6 @@ class ImageFeed:
         for image in image_subdirs:
             image_file = os.path.join(self.image_location, image_subdirs[image], image) 
             destination = os.path.join(location, image_subdirs[image], image) 
-            print "IMAGE: %s. DESTINATION: %s" % (image_file, destination)
             shutil.copyfile(image_file, destination)
 
             self.used_images.append(image)
@@ -56,8 +55,6 @@ class ImageFeed:
         """Gets a random sample of images of size from each subdirectory in image_location, returning a dictionary."""
         images = {}
         unused_images = self._get_unused_images()
-
-        print unused_images
         
         for subdirectory in unused_images: 
             subdir_images = random.sample(unused_images[subdirectory], size) 
@@ -77,11 +74,9 @@ class ImageFeed:
             os.makedirs(full_path)
 
     def _get_predictions(self, exp, location):
-        print exp
         SetCorpus(exp, location)  
         raw_predictions = GetPredictions(exp)
         predictions = {pred[0] : pred[2] for pred in raw_predictions}
-        print predictions
         return predictions
 
 

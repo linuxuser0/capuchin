@@ -8,6 +8,6 @@ SORTED_DIR = os.path.join(CURRENT_DIRECTORY, "sorted_dir")
 
 imagefeed = imagefeeds.ImageFeed(CORPUS_DIR, FEED_DIR)
 imprinter = imprinters.Imprinter(imagefeed, SORTED_DIR, 2, 1)
-monkey = monkeys.StaticMonkey(imprinter)
+monkey = monkeys.StaticWindowMonkey(imprinter, 3)
 
 print monkey.run()

@@ -14,6 +14,7 @@ class Imprinter:
         self.image_package_size = image_package_size
         self.initial_image_count = initial_image_count
         self.exp = ExperimentData()
+        self.layers = "S2"
         self.pool = MakePool('s')
         self._initial_imprint()
         
@@ -24,29 +25,33 @@ class Imprinter:
         SetModel(self.exp, model=MakeModel())
         self._imprint() 
 
+
     def _imprint(self):
         """Imprints and returns a set of visual cells given a series of images."""
         MakePrototypes(self.exp, self.num_prototypes, algorithm="imprint", pool=self.pool)
         return [ GetPrototype(self.exp, n) for n in range(GetNumPrototypes(self.exp)) ] 
         
-    def feed_and_imprint(self):
+    def get_next_prototypes_and_categories(self):
         """Requests images from this Imprinter's imagefeed and imprints them, returning visual cells."""
-        self.imagefeed.feed(self.image_package_size)
+        categories = self.imagefeed.feed(self.image_package_size)
         self.categorize()
-        return self._imprint()
+        return self._imprint(), categories
     
     def categorize(self):
         categories = self._get_categories()
         imagefeed._reset_directory(sorted_location)
         imagefeed._transfer_images(categories, sorted_location)
         
-    def _get_categories(self):
-        #new_exp = ExperimentData()
-        #prototypes = [ GetPrototype(exp, n) for n in range(0, GetNumPrototypes(exp)) ]
-        #new_exp.extractor.model.s2_prototypes = prototypes
-        SetCorpus(self.exp, self.imagefeed.feed_location) # TODO: INCLUDE PREVIOUS AWESOME PROTOTYPES
-        TrainAndTestClassifier(self.exp, self.layers, train_size = 0) # Evaluate without training. But must be trained! 
-        preditions = {pred[0] : pred[2] for pred in GetPredictions(self.exp) }
+    def _get_categories(self): # uses a new classifier, for good measure
+        new_exp = ExperimentData()
+        SetCorpus(new_exp, self.imagefeed.feed_location) 
+        SetModel(new_exp)
+        prototypes = [ GetPrototype(self.exp, n) for n in range(0, GetNumPrototypes(self.exp)) ]
+        new_exp.extractor.model.s2_prototypes = prototypes
+        
+        ComputeActivation(new_exp, self.layers, self.pool)
+        TrainAndTestClassifier(new_exp, self.layers) 
+        preditions = {pred[0] : pred[2] for pred in GetPredictions(new_exp) }
         return predictions
 
 
