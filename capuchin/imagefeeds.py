@@ -91,7 +91,6 @@ class ImageFeed:
                 full_path = os.path.join(directory, subdir)
                 os.makedirs(full_path)
 
-        print os.listdir(directory)
 
     def _get_predictions(self, exp, location):
         SetCorpus(exp, location)  

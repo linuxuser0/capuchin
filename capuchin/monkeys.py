@@ -49,25 +49,32 @@ class StaticWindowMonkey(BasicMonkey):
         self.exp = self.make_exp(imprinter, initial=True)
                 
     def run(self): 
+        print "Run initialized."
+        
         prototypes = numpy.concatenate((self.get_new_prototypes(), self.get_prototypes(self.exp)))
 
         if window_size is not None and len(self.prototypes) > window_size:
             prototypes.pop()
 
+        print "CREATING FINAL MAGIC:"
+
         self.exp = make_exp(prototypes)
 
+        print "Done."
+
     def get_prototypes(self, exp):
-        a =  [ GetPrototype(exp, n) for n in range(GetNumPrototypes(exp)) ]
-        print a
-        return a
+        return [ GetPrototype(exp, n) for n in range(GetNumPrototypes(exp)) ]
 
     def get_new_prototypes(self):
         try:
             self.imprinter.imagefeed.feed(1) # TODO change to variable
             categories = self.imprinter.categorize(self.exp) #obsoletes the old get_new_prototypes_and_categories
             new_prototypes = self.imprinter.imprint(self.exp) # so does this      
-        except Exception:
-            get_new_prototypes(self) # images from one or more labels missing, retry
+        except Exception, e:
+            if "No images found in directory" in str(e):
+                self.get_new_prototypes() # images from one or more labels missing, retry
+            else: 
+                raise 
 
         return new_prototypes
 

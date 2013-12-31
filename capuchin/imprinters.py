@@ -29,7 +29,7 @@ class Imprinter:
         else:
             count = self.image_package_size
             corpus = self.sorted_location
-
+            
         SetCorpus(exp, corpus)
         MakePrototypes(exp, self.num_prototypes, algorithm="imprint", pool=self.pool)
         return exp
@@ -52,11 +52,9 @@ class Imprinter:
         image_names = os.listdir(feed_location)
         image_paths = [ os.path.join(feed_location, name) for name in image_names ] 
         images = map(exp.extractor.model.MakeState, image_paths)
-        print image_names
 
         builder = Callback(BuildLayer, model, ev.layers, save_all=False)
         states = self.pool.map(builder, images)
-        print states
         features = ExtractFeatures(ev.layers, states)
 
         labels = ev.results.classifier.predict(features)
