@@ -9,10 +9,10 @@ class ImageFeed:
 
     ACCEPTED_FILETYPES = ['.png', '.jpg', '.jpeg']
 
-    def __init__(self, image_location, root_feed_location):
+    def __init__(self, image_location, feed_location):
         self.image_location = image_location 
         self.used_images = []
-        self.feed_location = root_feed_location # TODO consolidate variables 
+        self.feed_location = feed_location
 
     def feed(self, image_package_size): 
         """Get image_package_size images from each subdirectory in image_location and return them.""" 

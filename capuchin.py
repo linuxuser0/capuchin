@@ -1,7 +1,7 @@
 # THIS IS IT!
 
-from capuchin import *
 import random
+import capuchin
 
 test_window_times = 20
 twiddle_imagefeed = capuchin.imagefeeds.ImageFeed(IMAGE_LOCATION, FEED_LOCATION) 
@@ -69,7 +69,7 @@ def reproduce(population):
 def screen(population):
     return sorted(population, key=get_fitness)[-10:]
 
-def get_fitness(string)
+def get_fitness(string):
     monkey = capuchin.monkeys.GeneticMonkey(genetic_imprinter, string) 
     for n in range(1, genetic_time):
         monkey.run()
