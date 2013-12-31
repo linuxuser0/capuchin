@@ -1,4 +1,5 @@
 import numpy
+import glob
 from imprinters import Imprinter
 from imagefeeds import ImageFeed
 from glimpse.pools import *
@@ -21,20 +22,33 @@ class BasicMonkey:
         _evaluate_prototypes(self.prototypes, categories, self.pool) 
         
 
-    def evaluate_prototypes(self, prototypes, categories, pool):
-        exp = ExperimentData()
-        exp.extractor.model.s2_prototypes = prototypes
-        ComputeActivation(exp, "S2", pool)
-        TrainAndTestClassifier(exp, "S2")
-        predictions = { pred[0] : pred[2] for pred in GetPredictions(exp) }
-        actual = categories # TODO original datasets - make so doesn't influence ImageFeed categories (get from src.)
+    def get_results(self, prototypes): # Based on Mick Thomure's code
+        
+        exp = self.make_testing_exp(prototypes) 
+        ev = exp.evaluation[0]
+        model = exp.extractor.model
+
+        image_names = glob.glob(self.testing_location)
+        images = map(model.MakeState, image_names) 
+        builder = Callback(BuildLayer, model, ev.layers, save_all=False)
+        states = self.pool.map(builder, images)
+
+        features = ExtractFeatures(ev.layers, states)
+        labels = ev.results.classifier.predict(features)
+        classes = dict(zip(image_names, exp.corpus.class_names[labels]))
+
+        print classes
+        
+        actual = self.imprinter.imagefeed.get_categories()
+
+        print actual
 
         correct = 0
-        count = len(predictions)
+        count = len(classes)
 
-        for key, value in predictions:
-            if actual[key] == value:
-                correct += 1
+        for image_name in image_names:
+            if classes[image_name] == actual[image_name]:
+                correct += 1 
 
         return float(correct)/float(count)
     
@@ -45,6 +59,7 @@ class BasicMonkey:
         ComputeActivation(exp, Layer.S2, self.pool)
         TrainAndTestClassifier(exp, Layer.S2)
         return exp
+
  
 
 
@@ -59,15 +74,22 @@ class StaticWindowMonkey(BasicMonkey):
     def run(self): 
         print "Run initialized."
          
+        print self.get_new_prototypes()[0].shape
+        print self.get_prototypes(self.exp)[0].shape
+
         prototypes = self.get_new_prototypes() + self.get_prototypes(self.exp)
 
         if self.window_size is not None and len(prototypes) > self.window_size:
             prototypes.pop()
 
+        print self.get_new_prototypes()[0].shape
+        print self.get_prototypes(self.exp)[0].shape
+
         print "CREATING FINAL MAGIC:"
 
         self.exp = self.make_exp(self.imprinter)
-        self.exp.extractor.model.s2_kernels = prototypes # TODO ensure this works the same as s2_prototypes
+    
+        self.exp.extractor.model.s2_kernels = prototypes 
 
         print "Done."
 
@@ -77,7 +99,7 @@ class StaticWindowMonkey(BasicMonkey):
     def get_new_prototypes(self):
         try:
             self.imprinter.imagefeed.feed(5) # TODO change to variable
-            categories = self.imprinter.categorize(self.exp) #obsoletes the old get_new_prototypes_and_categories
+            self.imprinter.categorize(self.exp) #obsoletes the old get_new_prototypes_and_categories
             new_prototypes = self.imprinter.imprint(self.exp) # so does this      
         except Exception, e:
             if "No images found in directory" in str(e):

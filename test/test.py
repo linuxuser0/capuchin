@@ -11,4 +11,5 @@ imagefeed = imagefeeds.ImageFeed(CORPUS_DIR, FEED_DIR)
 imprinter = imprinters.Imprinter(imagefeed, INITIAL_DIR, SORTED_DIR, 2, 1)
 monkey = monkeys.StaticWindowMonkey(imprinter, 3)
 
-print monkey.run()
+monkey.run()
+print monkey.get_results()

@@ -65,6 +65,8 @@ class ImageFeed:
             subdir_unused_images = [ image for image in all_images if image not in self.used_images ]
             unused_images[subdirectory] = subdir_unused_images
 
+        print unused_images
+
         return unused_images
 
     def _get_random_image_sample(self, size):
