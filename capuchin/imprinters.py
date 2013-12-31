@@ -7,8 +7,11 @@ from imagefeeds import ImageFeed
 class Imprinter:
     """A simple class that accepts an imagefeed and returns imprinted visual cells from it."""
     
-    def __init__(self, imagefeed, sorted_location, initial_image_count, image_package_size, num_prototypes=10):
+    def __init__(self, imagefeed, initial_location, sorted_location, 
+            initial_image_count, image_package_size, num_prototypes=10):
+
         self.imagefeed = imagefeed 
+        self.initial_location = initial_location
         self.sorted_location = sorted_location
         self.num_prototypes = num_prototypes
         self.image_package_size = image_package_size
@@ -16,23 +19,23 @@ class Imprinter:
         self.exp = ExperimentData()
         self.layers = "S2"
         self.pool = MakePool('s')
-        self._initial_imprint()
         
-
-    def _initial_imprint(self): 
-        self.imagefeed.feed(self.initial_image_count) 
-        SetCorpus(self.exp, self.imagefeed.feed_location)
-        SetModel(self.exp, model=MakeModel())
-        self.imprint() 
-
-
-    def imprint(self):
+    def imprint(self, exp, initial=False):
         """Imprints and returns a set of visual cells given a series of images."""
-        MakePrototypes(self.exp, self.num_prototypes, algorithm="imprint", pool=self.pool)
-        return self.get_prototypes()# latest prototype 
+        
+        if initial:
+            count = self.initial_image_count
+            corpus = self.initial_location
+        else:
+            count = self.image_package_size
+            corpus = self.feed_location
 
-    def get_prototypes(self): 
-       return [ GetPrototype(self.exp, n) for n in range(GetNumPrototypes(self.exp)) ] 
+        SetCorpus(exp, corpus)
+        MakePrototypes(exp, self.num_prototypes, algorithm="imprint", pool=self.pool)
+        return exp
+
+    #def get_prototypes(self): 
+    #   return [ GetPrototype(self.exp, n) for n in range(GetNumPrototypes(self.exp)) ] 
 
     def categorize(self, exp):
         categories = self._get_categories(exp)
@@ -49,9 +52,11 @@ class Imprinter:
         image_names = os.listdir(feed_location)
         image_paths = [ os.path.join(feed_location, name) for name in image_names ] 
         images = map(exp.extractor.model.MakeState, image_paths)
+        print image_names
 
         builder = Callback(BuildLayer, model, ev.layers, save_all=False)
         states = self.pool.map(builder, images)
+        print states
         features = ExtractFeatures(ev.layers, states)
 
         labels = ev.results.classifier.predict(features)

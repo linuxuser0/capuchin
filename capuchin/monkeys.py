@@ -2,7 +2,7 @@ import numpy
 from imprinters import Imprinter
 from imagefeeds import ImageFeed
 from glimpse.pools import *
-from glimpse.experiments import *
+from glimpse.experiment import *
 
 """A collection of classes which utilize Imprinter instances to dynamically adapt HMAX models."""
 
@@ -46,10 +46,10 @@ class StaticWindowMonkey(BasicMonkey):
         self.imprinter = imprinter 
         self.window_size = window_size
         self.pool = MakePool('s')
-        prototypes = self.imprinter.imprint()
-        self.exp = self.make_exp(prototypes)
+        self.exp = self.make_exp(imprinter, initial=True)
                 
     def run(self): 
+        self.imprinter.imagefeed.feed(1) # TODO change to variable
         categories = self.imprinter.categorize(self.exp) #obsoletes the old get_new_prototypes_and_categories
         new_prototypes = self.imprinter.imprint() # so does this      
         prototypes = numpy.concatenate((new_prototypes, self.prototypes))
@@ -59,11 +59,12 @@ class StaticWindowMonkey(BasicMonkey):
 
         self.exp = make_exp(prototypes)
         
-    def make_exp(self, ps): # add to BasicMonkey
+    def make_exp(self, imprinter, initial=False): # add to BasicMonkey
         exp = ExperimentData()
         SetModel(exp)
-        exp.extractor.model.s2_prototypes = ps
+        imprinter.imprint(exp, initial)
         ComputeActivation(exp, Layer.S2, self.pool)
+        TrainAndTestClassifier(exp, Layer.S2)
         return exp
         
         
