@@ -37,7 +37,15 @@ class BasicMonkey:
                 correct += 1
 
         return float(correct)/float(count)
-
+    
+    def make_exp(self, imprinter, initial=False): # add to BasicMonkey
+        exp = ExperimentData()
+        SetModel(exp)
+        imprinter.imprint(exp, initial)
+        ComputeActivation(exp, Layer.S2, self.pool)
+        TrainAndTestClassifier(exp, Layer.S2)
+        return exp
+ 
 
 
 class StaticWindowMonkey(BasicMonkey): 
@@ -50,42 +58,36 @@ class StaticWindowMonkey(BasicMonkey):
                 
     def run(self): 
         print "Run initialized."
-        
-        prototypes = numpy.concatenate((self.get_new_prototypes(), self.get_prototypes(self.exp)))
+         
+        prototypes = self.get_new_prototypes() + self.get_prototypes(self.exp)
 
-        if window_size is not None and len(self.prototypes) > window_size:
+        if self.window_size is not None and len(prototypes) > self.window_size:
             prototypes.pop()
 
         print "CREATING FINAL MAGIC:"
 
-        self.exp = make_exp(prototypes)
+        self.exp = self.make_exp(self.imprinter)
+        self.exp.extractor.model.s2_kernels = prototypes # TODO ensure this works the same as s2_prototypes
 
         print "Done."
 
     def get_prototypes(self, exp):
-        return [ GetPrototype(exp, n) for n in range(GetNumPrototypes(exp)) ]
+        return exp.extractor.model.s2_kernels
 
     def get_new_prototypes(self):
         try:
-            self.imprinter.imagefeed.feed(1) # TODO change to variable
+            self.imprinter.imagefeed.feed(5) # TODO change to variable
             categories = self.imprinter.categorize(self.exp) #obsoletes the old get_new_prototypes_and_categories
             new_prototypes = self.imprinter.imprint(self.exp) # so does this      
         except Exception, e:
             if "No images found in directory" in str(e):
-                self.get_new_prototypes() # images from one or more labels missing, retry
+                new_prototypes = self.get_new_prototypes() # images from one or more labels missing, retry
             else: 
                 raise 
 
         return new_prototypes
 
-    def make_exp(self, imprinter, initial=False): # add to BasicMonkey
-        exp = ExperimentData()
-        SetModel(exp)
-        imprinter.imprint(exp, initial)
-        ComputeActivation(exp, Layer.S2, self.pool)
-        TrainAndTestClassifier(exp, Layer.S2)
-        return exp
-        
+       
 class GeneticMonkey(BasicMonkey):
 
     def __init__(self, imprinter, instructions):

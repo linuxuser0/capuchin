@@ -1,4 +1,4 @@
-import os
+import os, numpy
 from glimpse.experiment import *
 from glimpse.models import *
 from glimpse.pools import *
@@ -29,19 +29,19 @@ class Imprinter:
         else:
             count = self.image_package_size
             corpus = self.sorted_location
-            
-        SetCorpus(exp, corpus)
-        MakePrototypes(exp, self.num_prototypes, algorithm="imprint", pool=self.pool)
-        return exp
 
-    #def get_prototypes(self): 
-    #   return [ GetPrototype(self.exp, n) for n in range(GetNumPrototypes(self.exp)) ] 
+        SetCorpus(exp, corpus)
+        MakePrototypes(exp, self.num_prototypes, algorithm="imprint", pool=MakePool('s'))
+        return self.get_prototypes(exp) 
+
+    def get_prototypes(self, exp): 
+       return exp.extractor.model.s2_kernels
 
     def categorize(self, exp):
         categories = self._get_categories(exp)
         self.imagefeed._reset_directory(self.sorted_location)
         self.imagefeed.transfer_images(categories, self.sorted_location, predicted=True)
-        
+       
     def _get_categories(self, exp): # This code based off of Mick Thomure's PredictImageClasses gist
         """exp should have a model and prototypes"""
 
