@@ -28,7 +28,7 @@ class Imprinter:
             corpus = self.initial_location
         else:
             count = self.image_package_size
-            corpus = self.feed_location
+            corpus = self.sorted_location
 
         SetCorpus(exp, corpus)
         MakePrototypes(exp, self.num_prototypes, algorithm="imprint", pool=self.pool)
@@ -40,7 +40,7 @@ class Imprinter:
     def categorize(self, exp):
         categories = self._get_categories(exp)
         self.imagefeed._reset_directory(self.sorted_location)
-        self.imagefeed._transfer_images(categories, self.sorted_location)
+        self.imagefeed.transfer_images(categories, self.sorted_location, predicted=True)
         
     def _get_categories(self, exp): # This code based off of Mick Thomure's PredictImageClasses gist
         """exp should have a model and prototypes"""

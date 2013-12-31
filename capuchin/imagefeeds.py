@@ -16,23 +16,39 @@ class ImageFeed:
 
     def feed(self, image_package_size): 
         """Get image_package_size images from each subdirectory in image_location and return them.""" 
-        self._reset_directory(self.feed_location)
         image_subdirs = self._get_random_image_sample(image_package_size)
-        images = self._transfer_images(image_subdirs, self.feed_location) 
+        images = self.transfer_images(image_subdirs, self.feed_location, folders=False) 
         return image_subdirs 
 
             
-    def _transfer_images(self, image_subdirs, location):
+    def transfer_images(self, image_subdirs, location, folders=True, predicted=False):
         image_files = []
-        self._reset_directory(location)
+        self._reset_directory(location, folders)
 
         for image in image_subdirs:
-            image_file = os.path.join(self.image_location, image_subdirs[image], image) 
-            destination = os.path.join(location, image_subdirs[image], image) 
-            shutil.copyfile(image_file, destination)
+
+            if folders:
+                destination = os.path.join(location, image_subdirs[image], image) 
+            else:
+                destination = os.path.join(location, image)
+             
+            if predicted:
+                for subdir in os.listdir(location):
+                    image_file = os.path.join(self.image_location, subdir, image)
+                    try: 
+                        shutil.copyfile(image_file, destination)
+                        break
+                    except Exception:
+                        pass
+
+            else:
+                image_file = os.path.join(self.image_location, image_subdirs[image], image) 
+                shutil.copyfile(image_file, destination)
 
             self.used_images.append(image)
             image_files.append(image)
+
+        
         
         return image_files
 
@@ -63,15 +79,19 @@ class ImageFeed:
 
         return images
 
-    def _reset_directory(self, directory):
+    def _reset_directory(self, directory, folders=True):
         try:
             shutil.rmtree(directory)
         except OSError:
             pass
+
         os.makedirs(directory)
-        for subdir in os.listdir(self.image_location):
-            full_path = os.path.join(directory, subdir)
-            os.makedirs(full_path)
+        if folders:
+            for subdir in os.listdir(self.image_location):
+                full_path = os.path.join(directory, subdir)
+                os.makedirs(full_path)
+
+        print os.listdir(directory)
 
     def _get_predictions(self, exp, location):
         SetCorpus(exp, location)  

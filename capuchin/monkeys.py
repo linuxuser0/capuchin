@@ -49,16 +49,28 @@ class StaticWindowMonkey(BasicMonkey):
         self.exp = self.make_exp(imprinter, initial=True)
                 
     def run(self): 
-        self.imprinter.imagefeed.feed(1) # TODO change to variable
-        categories = self.imprinter.categorize(self.exp) #obsoletes the old get_new_prototypes_and_categories
-        new_prototypes = self.imprinter.imprint() # so does this      
-        prototypes = numpy.concatenate((new_prototypes, self.prototypes))
+        prototypes = numpy.concatenate((self.get_new_prototypes(), self.get_prototypes(self.exp)))
 
         if window_size is not None and len(self.prototypes) > window_size:
             prototypes.pop()
 
         self.exp = make_exp(prototypes)
-        
+
+    def get_prototypes(self, exp):
+        a =  [ GetPrototype(exp, n) for n in range(GetNumPrototypes(exp)) ]
+        print a
+        return a
+
+    def get_new_prototypes(self):
+        try:
+            self.imprinter.imagefeed.feed(1) # TODO change to variable
+            categories = self.imprinter.categorize(self.exp) #obsoletes the old get_new_prototypes_and_categories
+            new_prototypes = self.imprinter.imprint(self.exp) # so does this      
+        except Exception:
+            get_new_prototypes(self) # images from one or more labels missing, retry
+
+        return new_prototypes
+
     def make_exp(self, imprinter, initial=False): # add to BasicMonkey
         exp = ExperimentData()
         SetModel(exp)
@@ -66,8 +78,6 @@ class StaticWindowMonkey(BasicMonkey):
         ComputeActivation(exp, Layer.S2, self.pool)
         TrainAndTestClassifier(exp, Layer.S2)
         return exp
-        
-        
         
 class GeneticMonkey(BasicMonkey):
 
