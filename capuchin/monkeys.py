@@ -22,8 +22,10 @@ class BasicMonkey:
         _evaluate_prototypes(self.prototypes, categories, self.pool) 
         
 
-    def get_results(self, prototypes): # Based on Mick Thomure's code
+    def get_results(self): # Based on Mick Thomure's code
         
+        prototypes = self.exp.extractor.model.s2_kernels   
+
         exp = self.make_testing_exp(prototypes) 
         ev = exp.evaluation[0]
         model = exp.extractor.model
@@ -37,11 +39,11 @@ class BasicMonkey:
         labels = ev.results.classifier.predict(features)
         classes = dict(zip(image_names, exp.corpus.class_names[labels]))
 
-        print classes
+        #print classes
         
         actual = self.imprinter.imagefeed.get_categories()
 
-        print actual
+        #print actual
 
         correct = 0
         count = len(classes)
@@ -52,15 +54,13 @@ class BasicMonkey:
 
         return float(correct)/float(count)
     
-    def make_exp(self, imprinter, initial=False): # add to BasicMonkey
+    def make_exp(self, initial=False): # add to BasicMonkey
         exp = ExperimentData()
         SetModel(exp)
-        imprinter.imprint(exp, initial)
+        self.imprinter.imprint(exp, initial=initial) # try multiple times when not initial!
         ComputeActivation(exp, Layer.S2, self.pool)
         TrainAndTestClassifier(exp, Layer.S2)
         return exp
-
- 
 
 
 class StaticWindowMonkey(BasicMonkey): 
@@ -69,7 +69,7 @@ class StaticWindowMonkey(BasicMonkey):
         self.imprinter = imprinter 
         self.window_size = window_size
         self.pool = MakePool('s')
-        self.exp = self.make_exp(imprinter, initial=True)
+        self.exp = self.make_exp(initial=True)
                 
     def run(self): 
         print "Run initialized."
@@ -77,18 +77,27 @@ class StaticWindowMonkey(BasicMonkey):
         print self.get_new_prototypes()[0].shape
         print self.get_prototypes(self.exp)[0].shape
 
-        prototypes = self.get_new_prototypes() + self.get_prototypes(self.exp)
+        prototypes = [ numpy.concatenate(self.get_new_prototypes() + self.get_prototypes(self.exp)) ]
+
+        print prototypes
+
+        print "Joined magic prototypes."
 
         if self.window_size is not None and len(prototypes) > self.window_size:
-            prototypes.pop()
+            numpy.delete(prototypes, numpy.s_[3:])
+
+        print "Popped magic prototypes."
 
         print self.get_new_prototypes()[0].shape
         print self.get_prototypes(self.exp)[0].shape
 
         print "CREATING FINAL MAGIC:"
 
-        self.exp = self.make_exp(self.imprinter)
-    
+        self.exp = self.make_exp()
+
+        print [ a.shape for a in self.get_new_prototypes() ]
+        print [ a.shape for a in self.get_prototypes(self.exp) ]
+
         self.exp.extractor.model.s2_kernels = prototypes 
 
         print "Done."
@@ -96,14 +105,21 @@ class StaticWindowMonkey(BasicMonkey):
     def get_prototypes(self, exp):
         return exp.extractor.model.s2_kernels
 
-    def get_new_prototypes(self):
+    def get_new_prototypes(self, images=5):
         try:
-            self.imprinter.imagefeed.feed(5) # TODO change to variable
-            self.imprinter.categorize(self.exp) #obsoletes the old get_new_prototypes_and_categories
-            new_prototypes = self.imprinter.imprint(self.exp) # so does this      
+            print images
+            self.imprinter.imagefeed.feed(images) 
+            print "FED"
+            self.imprinter.categorize(self.exp)
+            print "CATEGORIZED!"
+            new_prototypes = self.imprinter.imprint(self.exp)
+            print "IMPRINTED!!"
         except Exception, e:
             if "No images found in directory" in str(e):
-                new_prototypes = self.get_new_prototypes() # images from one or more labels missing, retry
+                new_images = images + 5
+                print new_images
+                new_prototypes = self.get_new_prototypes(images=new_images) # images from one or more labels missing, retry at next timestep
+                print "Timestep skipped."
             else: 
                 raise 
 
