@@ -20,19 +20,22 @@ class Imprinter:
         self.layers = "S2"
         self.pool = MakePool('s')
         
-    def imprint(self, exp, initial=False):
+    def imprint(self, exp, initial=False, testing=False):
         """Imprints and returns a set of visual cells given a series of images."""
         
         if initial:
             count = self.initial_image_count
             corpus = self.initial_location
+        elif testing:
+            count = len(os.listdir(self.imagefeed.image_location))
+            corpus = self.imagefeed.image_location 
         else:
             count = self.image_package_size
             corpus = self.sorted_location
 
         SetCorpus(exp, corpus)
         MakePrototypes(exp, self.num_prototypes, algorithm="imprint", pool=MakePool('s'))
-        return self.get_prototypes(exp) 
+        return self.get_prototypes(exp)
 
     def get_prototypes(self, exp): 
        return exp.extractor.model.s2_kernels

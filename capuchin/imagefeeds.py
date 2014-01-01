@@ -14,16 +14,17 @@ class ImageFeed:
         self.used_images = []
         self.feed_location = feed_location
 
-    def feed(self, image_package_size): 
+    def feed(self, image_package_size, reset=True): 
         """Get image_package_size images from each subdirectory in image_location and return them.""" 
         image_subdirs = self._get_random_image_sample(image_package_size)
-        images = self.transfer_images(image_subdirs, self.feed_location, folders=False) 
+        images = self.transfer_images(image_subdirs, self.feed_location, folders=False, reset=reset) 
         return image_subdirs 
 
             
-    def transfer_images(self, image_subdirs, location, folders=True, predicted=False):
+    def transfer_images(self, image_subdirs, location, folders=True, predicted=False, reset=True):
         image_files = []
-        self._reset_directory(location, folders)
+        if reset:
+            self._reset_directory(location, folders)
 
         for image in image_subdirs:
 

@@ -22,28 +22,28 @@ class BasicMonkey:
         _evaluate_prototypes(self.prototypes, categories, self.pool) 
         
 
-    def get_results(self): # Based on Mick Thomure's code
-        
-        prototypes = self.exp.extractor.model.s2_kernels   
+    def get_results(self, final=False): # Based on Mick Thomure's code TODO understand
 
-        exp = self.make_testing_exp(prototypes) 
-        ev = exp.evaluation[0]
-        model = exp.extractor.model
+        if final:
+            prototypes = self.exp.extractor.model.s2_kernels   
 
-        image_names = glob.glob(self.testing_location)
-        images = map(model.MakeState, image_names) 
-        builder = Callback(BuildLayer, model, ev.layers, save_all=False)
-        states = self.pool.map(builder, images)
+            exp = self.make_testing_exp(prototypes) 
+            ev = exp.evaluation[0]
+            model = exp.extractor.model
 
-        features = ExtractFeatures(ev.layers, states)
-        labels = ev.results.classifier.predict(features)
-        classes = dict(zip(image_names, exp.corpus.class_names[labels]))
+            image_names = glob.glob(self.testing_location)
+            images = map(model.MakeState, image_names) 
+            builder = Callback(BuildLayer, model, ev.layers, save_all=False)
+            states = self.pool.map(builder, images)
 
-        #print classes
+            features = ExtractFeatures(ev.layers, states)
+            labels = ev.results.classifier.predict(features)
+            classes = dict(zip(image_names, exp.corpus.class_names[labels]))
+        else:
+            predictions = GetPredictions(self.exp)
+            classes = dict(zip(predictions[0], predictions[2]))
         
         actual = self.imprinter.imagefeed.get_categories()
-
-        #print actual
 
         correct = 0
         count = len(classes)
@@ -54,12 +54,22 @@ class BasicMonkey:
 
         return float(correct)/float(count)
     
-    def make_exp(self, initial=False): # add to BasicMonkey
+    def make_exp(self, initial=False, imprint=True, prototypes=None): 
         exp = ExperimentData()
         SetModel(exp)
-        self.imprinter.imprint(exp, initial=initial) # try multiple times when not initial!
-        ComputeActivation(exp, Layer.S2, self.pool)
-        TrainAndTestClassifier(exp, Layer.S2)
+        if prototypes is None:
+            prototypes = self.imprinter.imprint(exp, initial=initial) 
+            # TODO try multiple times when not initial?
+        else:
+            SetCorpus(exp) # FIX THIS LINE
+        exp = self.set_prototypes(exp, prototypes) 
+
+        return exp
+
+    def make_testing_exp(self, prototypes):
+        exp = ExperimentData()
+        SetModel(exp)
+        self.set_prototypes(exp, prototypes)
         return exp
 
 
@@ -70,60 +80,45 @@ class StaticWindowMonkey(BasicMonkey):
         self.window_size = window_size
         self.pool = MakePool('s')
         self.exp = self.make_exp(initial=True)
+        self.feeds = 1 
                 
     def run(self): 
-        print "Run initialized."
-         
-        print self.get_new_prototypes()[0].shape
-        print self.get_prototypes(self.exp)[0].shape
 
-        prototypes = [ numpy.concatenate(self.get_new_prototypes() + self.get_prototypes(self.exp)) ]
-
-        print prototypes
-
-        print "Joined magic prototypes."
+        prototypes = [ numpy.concatenate(self.get_new_prototypes(self.exp) + self.get_prototypes(self.exp)) ]
 
         if self.window_size is not None and len(prototypes) > self.window_size:
             numpy.delete(prototypes, numpy.s_[3:])
 
-        print "Popped magic prototypes."
-
-        print self.get_new_prototypes()[0].shape
-        print self.get_prototypes(self.exp)[0].shape
-
-        print "CREATING FINAL MAGIC:"
-
-        self.exp = self.make_exp()
-
-        print [ a.shape for a in self.get_new_prototypes() ]
-        print [ a.shape for a in self.get_prototypes(self.exp) ]
-
-        self.exp.extractor.model.s2_kernels = prototypes 
+        self.exp = self.make_exp(prototypes)
 
         print "Done."
+
+        return self.feeds
 
     def get_prototypes(self, exp):
         return exp.extractor.model.s2_kernels
 
-    def get_new_prototypes(self, images=5):
+    def set_prototypes(self, exp, prototypes):
+        exp.extractor.model.s2_kernels = prototypes
+        ComputeActivation(exp, Layer.S2, self.pool)
+        TrainAndTestClassifier(exp, Layer.S2)
+        return exp
+
+    def get_new_prototypes(self, exp, images=5, reset=True):
         try:
-            print images
-            self.imprinter.imagefeed.feed(images) 
-            print "FED"
-            self.imprinter.categorize(self.exp)
-            print "CATEGORIZED!"
-            new_prototypes = self.imprinter.imprint(self.exp)
-            print "IMPRINTED!!"
+            self.imprinter.imagefeed.feed(images, reset) 
+            self.imprinter.categorize(exp)
+            new_exp = self.imprinter.imprint(exp)
+
         except Exception, e:
             if "No images found in directory" in str(e):
-                new_images = images + 5
-                print new_images
-                new_prototypes = self.get_new_prototypes(images=new_images) # images from one or more labels missing, retry at next timestep
-                print "Timestep skipped."
+                new_exp = self.get_new_prototypes(exp, reset=False) 
+                print "Timestep skipped." # TODO implement in test 
+                self.feeds += 1
             else: 
                 raise 
 
-        return new_prototypes
+        return new_exp 
 
        
 class GeneticMonkey(BasicMonkey):
