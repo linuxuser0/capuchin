@@ -81,7 +81,22 @@ class BasicMonkey:
         TrainAndTestClassifier(exp, Layer.S2)
         return exp
 
+    def get_prototypes(self, exp):
+        return exp.extractor.model.s2_kernels
 
+    def get_new_prototypes(self, exp, images=5, reset=True, num=None):
+        try:
+            self.imprinter.imagefeed.feed(images, reset) 
+            self.imprinter.categorize(exp)
+            new_exp = self.imprinter.imprint(exp, num_prototypes=num)
+
+        except Exception, e:
+            if "No images found in directory" in str(e):
+                new_exp = self.get_new_prototypes(exp, reset=False) 
+                print "Timestep skipped." # TODO implement in test 
+                self.feeds += 1
+            else: 
+                raise 
 
 class StaticWindowMonkey(BasicMonkey): 
     
@@ -103,54 +118,38 @@ class StaticWindowMonkey(BasicMonkey):
 
         print "Done."
 
-        return self.feeds
-
-    def get_prototypes(self, exp):
-        return exp.extractor.model.s2_kernels
-
-    def get_new_prototypes(self, exp, images=5, reset=True):
-        try:
-            self.imprinter.imagefeed.feed(images, reset) 
-            self.imprinter.categorize(exp)
-            new_exp = self.imprinter.imprint(exp)
-
-        except Exception, e:
-            if "No images found in directory" in str(e):
-                new_exp = self.get_new_prototypes(exp, reset=False) 
-                print "Timestep skipped." # TODO implement in test 
-                self.feeds += 1
-            else: 
-                raise 
-
+        return self.feeds # TODO implement!!!
         return new_exp 
 
        
-class GeneticMonkey(BasicMonkey):
+class GeneticMonkey(BasicMonkey): # TODO error handling - just swallow exceptions!
 
     def __init__(self, imprinter, instructions):
         self.imprinter = imprinter
+        self.pool = MakePool('s')
         self.instructions = instructions
-        self.prototypes = imprinter.get_prototypes()
-        
+        self.exp = self.make_exp(initial=True)
+                
     def run(self):
         keyword, argument = self.instructions.pop(0).split()
-        times = int(argument)
-        new_prototypes, categories = self.imprinter.get_next_prototypes_and_categories()
+        times = int(argument) 
+        prototypes = self.get_prototypes(self.exp) 
         
         if keyword == "rf":
-            for n in range(0, times):
+            for n in range(times):
                 self.prototypes.pop(0)
         elif keyword == "rl":
-            for n in range(0, times):
+            for n in range(times):
                 self.prototypes.pop()
         elif keyword == "af":
-            for n in range(0, times):
-                self.prototypes[:0] = new_prototypes
+            new_prototypes = self.get_new_prototypes(num=times)
+            self.prototypes[:0] = new_prototypes
         elif keyword == "al":
-            for n in range(0, times):
-                self.prototypes.extend(new_prototypes)
+            new_prototypes = self.get_new_prototypes(num=times)
+            self.prototypes.extend(new_prototypes)
 
-        return _evaluate_prototypes(exp, self.prototypes, categories)
+        self.set_prototypes(self.exp, prototypes)
+
 
             
         
