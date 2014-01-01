@@ -82,6 +82,16 @@ class ImageFeed:
 
         return images
 
+    def get_categories(self):
+        categories = {}
+        for subdirectory in os.listdir(self.image_location):
+            full_path = os.path.join(self.image_location, subdirectory)
+            for image in os.listdir(full_path):
+                categories[image] = subdirectory
+
+        return categories
+            
+
     def _reset_directory(self, directory, folders=True):
         try:
             shutil.rmtree(directory)

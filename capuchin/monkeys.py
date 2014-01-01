@@ -15,7 +15,6 @@ class BasicMonkey:
         self.imprinter = imprinter
         self.pool = MakePool('s')
         self.prototypes = imprinter.get_prototypes()
-        print "ENSURE THIS ISN'T NONE: %s" % self.prototypes
 
     def run(self):
         new_prototypes, categories = self.imprinter.get_next_prototypes_and_categories()
@@ -24,31 +23,42 @@ class BasicMonkey:
 
     def get_results(self, final=False): # Based on Mick Thomure's code TODO understand
 
+        #prototypes = self.exp.extractor.model.s2_kernels   
+        #exp = self.make_testing_exp(prototypes) 
+
+        exp = self.exp
+
+        ev = exp.evaluation[0]
+        model = exp.extractor.model
+
         if final:
-            prototypes = self.exp.extractor.model.s2_kernels   
-
-            exp = self.make_testing_exp(prototypes) 
-            ev = exp.evaluation[0]
-            model = exp.extractor.model
-
-            image_names = glob.glob(self.testing_location)
-            images = map(model.MakeState, image_names) 
-            builder = Callback(BuildLayer, model, ev.layers, save_all=False)
-            states = self.pool.map(builder, images)
-
-            features = ExtractFeatures(ev.layers, states)
-            labels = ev.results.classifier.predict(features)
-            classes = dict(zip(image_names, exp.corpus.class_names[labels]))
+            loc = self.imprinter.imagefeed.image_location
+            image_files = []
+            for subdir in os.listdir(loc):
+                image_names = os.listdir(os.path.join(loc, subdir))
+                image_files.extend([os.path.join(loc, subdir, name) for name in image_names])
         else:
-            predictions = GetPredictions(self.exp)
-            classes = dict(zip(predictions[0], predictions[2]))
-        
+            loc = self.imprinter.imagefeed.feed_location 
+            image_names = os.listdir(loc)
+            image_files = [os.path.join(loc, name) for name in image_names]
+                    
+        images = map(model.MakeState, image_files) 
+        builder = Callback(BuildLayer, model, ev.layers, save_all=False)
+        states = self.pool.map(builder, images)
+
+        features = ExtractFeatures(ev.layers, states)
+        labels = ev.results.classifier.predict(features)
+        classes = dict(zip(image_names, exp.corpus.class_names[labels]))
+
         actual = self.imprinter.imagefeed.get_categories()
+
+        print actual
+        print classes
 
         correct = 0
         count = len(classes)
 
-        for image_name in image_names:
+        for image_name in classes:
             if classes[image_name] == actual[image_name]:
                 correct += 1 
 
