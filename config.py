@@ -1,0 +1,6 @@
+IMAGE_LOCATION = "test/test_corpus"
+FEED_LOCATION = "test/test_feed"
+SORTED_LOCATION = "test/test_sorted"
+INITIAL_IMAGE_COUNT = 10 
+IMAGE_PACKAGE_SIZE = 5
+NUM_PROTOTYPES = 10

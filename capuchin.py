@@ -1,22 +1,28 @@
 # THIS IS IT!
 
 import random
-import capuchin
+from capuchin import *
+from config import *
 
 test_window_times = 20
-twiddle_imagefeed = capuchin.imagefeeds.ImageFeed(IMAGE_LOCATION, FEED_LOCATION) 
-twiddle_imprinter = capuchin.imprinters.Imprinter(twiddle_imagefeed, 
-        SORTED_LOCATION, INITIAL_IMAGE_COUNT, IMAGE_PACKAGE_SIZE, NUM_PROTOTYPES) 
+imagefeed = imagefeeds.ImageFeed(IMAGE_LOCATION, FEED_LOCATION) 
+imprinter = imprinters.Imprinter(imagefeed, SORTED_LOCATION, INITIAL_IMAGE_COUNT, IMAGE_PACKAGE_SIZE, NUM_PROTOTYPES) 
 
-def basic():
-    monkey = capuchin.monkeys.BasicMonkey(imprinter)
-    for n in range(1, test_basic_times): 
+def basic(times):
+    values = []
+    monkey = monkeys.BasicMonkey(imprinter)
+    for n in range(test_basic_times): 
         monkey.run()
+        if n == times:
+            results = monkey.get_results(final=True)
+        else:
+            results = monkey.get_results()
+        values.append(results)
+        print "Round {0}: {1}".format(n, results)
 
-    return monkey.run()
+    print "AVERAGE: {0}".format(float(sum(values))/float(len(values)))
 
-
-def twiddle():
+def twiddle(): # Algorithm introduced by Sebastian Thrun (genius) on Udacity - thanks!
     window = random.randint(1, 1000)  
     delta = 50
     best_accuracy = test_window(window)
@@ -41,7 +47,7 @@ def twiddle():
     return window, best_accuracy
 
 def test_window(window):
-    monkey = capuchin.monkeys.StaticWindowMonkey(twiddle_imprinter, window)
+    monkey = monkeys.StaticWindowMonkey(twiddle_imprinter, window) 
     for n in range(1, test_window_times):
         monkey.run()
 
@@ -78,6 +84,6 @@ def get_fitness(string):
 
 ###################################################################################3
 
-print basic()
-print twiddle()
-print genetic()
+basic(5)
+#print twiddle()
+#print genetic()

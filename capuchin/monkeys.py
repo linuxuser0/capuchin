@@ -14,17 +14,12 @@ class BasicMonkey:
     def __init__(self, imprinter):
         self.imprinter = imprinter
         self.pool = MakePool('s')
-        self.prototypes = imprinter.get_prototypes()
+        self.exp = self.make_exp(initial=True)
 
     def run(self):
-        new_prototypes, categories = self.imprinter.get_next_prototypes_and_categories()
-        _evaluate_prototypes(self.prototypes, categories, self.pool) 
-        
+        imprinter.imagefeed.feed(5) # TODO make variable
 
     def get_results(self, final=False): # Based on Mick Thomure's code TODO understand
-
-        #prototypes = self.exp.extractor.model.s2_kernels   
-        #exp = self.make_testing_exp(prototypes) 
 
         exp = self.exp
 
