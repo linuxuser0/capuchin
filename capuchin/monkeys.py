@@ -137,18 +137,31 @@ class GeneticMonkey(BasicMonkey): # TODO error handling - just swallow exception
         
         if keyword == "rf":
             for n in range(times):
-                self.prototypes.pop(0)
+                if len(prototypes) > 0:
+                    prototypes.pop(0)
         elif keyword == "rl":
             for n in range(times):
-                self.prototypes.pop()
+                if len(prototypes) > 0:
+                    prototypes.pop()
         elif keyword == "af":
-            new_prototypes = self.get_new_prototypes(num=times)
-            self.prototypes[:0] = new_prototypes
+            try:
+                new_prototypes = self.get_new_prototypes(self.exp, num=times)
+                if new_prototypes is not None:
+                    prototypes[:0] = new_prototypes
+            except:
+                pass
         elif keyword == "al":
-            new_prototypes = self.get_new_prototypes(num=times)
-            self.prototypes.extend(new_prototypes)
+            try:
+                new_prototypes = self.get_new_prototypes(self.exp, num=times)
+                if new_prototypes is not None:
+                    prototypes.extend(new_prototypes)
+            except:
+                pass
 
-        self.set_prototypes(self.exp, prototypes)
+        try:
+            self.set_prototypes(self.exp, prototypes) # put in DOR - that if this fails, will revert to old prototype results 
+        except:
+            pass
 
 
             

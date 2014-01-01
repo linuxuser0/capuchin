@@ -8,16 +8,20 @@ test_window_times = 2
 imagefeed = imagefeeds.ImageFeed(IMAGE_LOCATION, FEED_LOCATION) 
 imprinter = imprinters.Imprinter(imagefeed, INITIAL_LOCATION, SORTED_LOCATION, num_prototypes=NUM_PROTOTYPES) 
 
-def basic(times, monkey=None): # TODO twiddle over num_prototypes?
+def basic(times, monkey=None, genetic=False): # TODO twiddle over num_prototypes?
     values = []
     if monkey is None:
         monkey = monkeys.BasicMonkey(imprinter, IMAGE_PACKAGE_SIZE)
     for n in range(times): 
         monkey.run()
-        if n == times:
-            results = monkey.get_results(final=True)
+        final = (n == times)
+        if genetic:
+            try:
+                results = monkey.get_results(final=final)
+            except IndexError: # faulty psuedo ga code
+                results = 0
         else:
-            results = monkey.get_results()
+            results = monkey.get_results(final=final)
         values.append(results)
         print "Round {0}: {1}".format(n+1, results)
 
@@ -58,7 +62,7 @@ def test_window(window):
     return basic(times, monkey) #WHOA! fix to times
 
 
-def genetic(times):
+def genetic(times): # TODO implement all time best!
     """Optimizes the instructions for GeneticMonkey."""
     population = get_initial_population()
     for n in range(times):
@@ -86,7 +90,7 @@ def get_initial_population():
 
     return 
 def reproduce(population):
-    """Reproduces the instruction strings, via genetic algorithm."""
+    """Reproduces the instruction strings randomly, via genetic algorithm."""
     new_population = []
 
     for a in population:
@@ -104,7 +108,8 @@ def screen(population):
 
 def get_fitness(string): # modify for average!
     monkey = monkeys.GeneticMonkey(imprinter, string) 
-    return basic(10, monkey) # ten is number of times to get avg.
+    return basic(10, monkey, genetic=True) # ten is number of times to get avg.
+        
 
 ###################################################################################
 
