@@ -7,15 +7,12 @@ from imagefeeds import ImageFeed
 class Imprinter:
     """A simple class that accepts an imagefeed and returns imprinted visual cells from it."""
     
-    def __init__(self, imagefeed, initial_location, sorted_location, 
-            initial_image_count, image_package_size, num_prototypes=10):
+    def __init__(self, imagefeed, initial_location, sorted_location, num_prototypes=10):
 
         self.imagefeed = imagefeed 
         self.initial_location = initial_location
         self.sorted_location = sorted_location
         self.num_prototypes = num_prototypes
-        self.image_package_size = image_package_size
-        self.initial_image_count = initial_image_count
         self.exp = ExperimentData()
         self.layers = "S2"
         self.pool = MakePool('s')
@@ -24,13 +21,13 @@ class Imprinter:
         """Imprints and returns a set of visual cells given a series of images."""
         
         if initial:
-            count = self.initial_image_count
+            #count = self.initial_image_count
             corpus = self.initial_location
         elif testing:
-            count = len(os.listdir(self.imagefeed.image_location))
+            #count = len(os.listdir(self.imagefeed.image_location))
             corpus = self.imagefeed.image_location 
         else:
-            count = self.image_package_size
+            #count = self.image_package_size
             corpus = self.sorted_location
 
         SetCorpus(exp, corpus)

@@ -11,13 +11,14 @@ class BasicMonkey:
 
     """Uses initial imprinting to evaluate images. Rather dumb."""
 
-    def __init__(self, imprinter):
+    def __init__(self, imprinter, image_package_size):
         self.imprinter = imprinter
+        self.image_package_size = image_package_size
         self.pool = MakePool('s')
         self.exp = self.make_exp(initial=True)
 
     def run(self):
-        imprinter.imagefeed.feed(5) # TODO make variable
+        self.imprinter.imagefeed.feed(self.image_package_size) 
 
     def get_results(self, final=False): # Based on Mick Thomure's code TODO understand
 
@@ -47,9 +48,6 @@ class BasicMonkey:
 
         actual = self.imprinter.imagefeed.get_categories()
 
-        print actual
-        print classes
-
         correct = 0
         count = len(classes)
 
@@ -77,6 +75,13 @@ class BasicMonkey:
         self.set_prototypes(exp, prototypes)
         return exp
 
+    def set_prototypes(self, exp, prototypes):
+        exp.extractor.model.s2_kernels = prototypes
+        ComputeActivation(exp, Layer.S2, self.pool)
+        TrainAndTestClassifier(exp, Layer.S2)
+        return exp
+
+
 
 class StaticWindowMonkey(BasicMonkey): 
     
@@ -102,12 +107,6 @@ class StaticWindowMonkey(BasicMonkey):
 
     def get_prototypes(self, exp):
         return exp.extractor.model.s2_kernels
-
-    def set_prototypes(self, exp, prototypes):
-        exp.extractor.model.s2_kernels = prototypes
-        ComputeActivation(exp, Layer.S2, self.pool)
-        TrainAndTestClassifier(exp, Layer.S2)
-        return exp
 
     def get_new_prototypes(self, exp, images=5, reset=True):
         try:

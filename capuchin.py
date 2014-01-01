@@ -6,19 +6,19 @@ from config import *
 
 test_window_times = 20
 imagefeed = imagefeeds.ImageFeed(IMAGE_LOCATION, FEED_LOCATION) 
-imprinter = imprinters.Imprinter(imagefeed, SORTED_LOCATION, INITIAL_IMAGE_COUNT, IMAGE_PACKAGE_SIZE, NUM_PROTOTYPES) 
+imprinter = imprinters.Imprinter(imagefeed, INITIAL_LOCATION, SORTED_LOCATION, num_prototypes=NUM_PROTOTYPES) 
 
 def basic(times):
     values = []
-    monkey = monkeys.BasicMonkey(imprinter)
-    for n in range(test_basic_times): 
+    monkey = monkeys.BasicMonkey(imprinter, IMAGE_PACKAGE_SIZE)
+    for n in range(times): 
         monkey.run()
         if n == times:
             results = monkey.get_results(final=True)
         else:
             results = monkey.get_results()
         values.append(results)
-        print "Round {0}: {1}".format(n, results)
+        print "Round {0}: {1}".format(n+1, results)
 
     print "AVERAGE: {0}".format(float(sum(values))/float(len(values)))
 
