@@ -2,6 +2,9 @@ import random
 from capuchin import *
 from config import *
 
+imagefeed = imagefeeds.ImageFeed(IMAGE_LOCATION, FEED_LOCATION) 
+imprinter = imprinters.Imprinter(imagefeed, INITIAL_LOCATION, SORTED_LOCATION, num_prototypes=NUM_PROTOTYPES) 
+
 def evaluate_monkey(times, monkey, genetic=False):  
     values = []
     n = 0
@@ -21,14 +24,7 @@ def try_get_results(monkey, final=False):
     except IndexError: # implying faulty GA code
         return 0
 
-def get_imprinter(): # TODO implement!
-    return imprinters.Imprinter(get_imagefeed(), INITIAL_LOCATION, SORTED_LOCATION, num_prototypes=NUM_PROTOTYPES) 
-
-def get_imagefeed():
-    return imagefeeds.ImageFeed(IMAGE_LOCATION, FEED_LOCATION) 
-
 def basic(times, num_prototypes): 
-    imprinter = get_imprinter()
     monkey = monkeys.BasicMonkey(imprinter, IMAGE_PACKAGE_SIZE, num_prototypes=num_prototypes)
     return evaluate_monkey(times, monkey)
         
@@ -65,7 +61,7 @@ def test_window(window):
     return evaluate_monkey(times, monkey) 
 
 
-def genetic(times): 
+def genetic(times): # TODO implement all time best!
     """Optimizes the instructions for GeneticMonkey."""
     population = get_initial_population()
     all_best = None
@@ -123,7 +119,7 @@ def get_fitness(string): # modify for average!
         
 
 ###################################################################################
-
+"""
 points = []
 for n in range(1, 50):
     print "TESTING NUM_PROTOTYPES {0}".format(n)
@@ -131,6 +127,7 @@ for n in range(1, 50):
 
 average = float(sum(points))/float(len(points)) 
 print "FINAL VALUE: {0}".format(average)
+"""
 
-#twiddle(10, 2) 
+twiddle(10, 2) 
 #genetic(2)

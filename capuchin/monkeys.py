@@ -11,16 +11,18 @@ class BasicMonkey:
 
     """Uses initial imprinting to evaluate images. Rather dumb."""
 
-    def __init__(self, imprinter, image_package_size):
+    def __init__(self, imprinter, image_package_size, num_prototypes): # for testing, i_p_s = 5
         self.imprinter = imprinter
         self.image_package_size = image_package_size
+        self.num_prototypes = num_prototypes
         self.pool = MakePool('s')
-        self.exp = self.make_exp(initial=True)
+        self.exp = self.make_exp(initial=True, num_prototypes=num_prototypes)
 
     def run(self):
         self.imprinter.imagefeed.feed(self.image_package_size) 
+        return 1 # number of feeds used
 
-    def get_results(self, final=False): # Based on Mick Thomure's code TODO understand
+    def get_results(self, final=False): # Based on Mick Thomure's code - thanks! 
 
         exp = self.exp
 
@@ -57,13 +59,13 @@ class BasicMonkey:
 
         return float(correct)/float(count)
     
-    def make_exp(self, initial=False, imprint=True, prototypes=None): 
+    def make_exp(self, initial=False, imprint=True, prototypes=None, num_prototypes=10): 
         exp = ExperimentData()
         SetModel(exp)
         if prototypes is not None:
             SetCorpus(exp, self.imprinter.sorted_location)
         else:
-            prototypes = self.imprinter.imprint(exp, initial=initial) 
+            prototypes = self.imprinter.imprint(exp, initial=initial, num_prototypes=num_prototypes) 
         exp = self.set_prototypes(exp, prototypes) 
 
         return exp
@@ -121,7 +123,7 @@ class StaticWindowMonkey(BasicMonkey):
         return new_exp 
 
        
-class GeneticMonkey(BasicMonkey): 
+class GeneticMonkey(BasicMonkey):  # TODO implement double-feeding!
 
     def __init__(self, imprinter, instructions):
         self.imprinter = imprinter
