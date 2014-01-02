@@ -26,6 +26,8 @@ class BasicMonkey:
 
         exp = self.exp
 
+        print self.get_prototypes(self.exp)
+
         ev = exp.evaluation[0]
         model = exp.extractor.model
 
@@ -89,15 +91,17 @@ class BasicMonkey:
         try:
             self.imprinter.imagefeed.feed(images, reset) 
             self.imprinter.categorize(exp)
-            new_exp = self.imprinter.imprint(exp, num_prototypes=num)
+            prototypes = self.imprinter.imprint(exp, num_prototypes=num)
 
         except Exception, e:
             if "No images found in directory" in str(e):
-                new_exp = self.get_new_prototypes(exp, reset=False) 
-                print "Timestep skipped." # TODO implement in test 
+                prototypes = self.get_new_prototypes(exp, reset=False) 
+                #print "Timestep skipped."
                 self.feeds += 1
             else: 
-                raise 
+                raise
+
+        return prototypes
 
 class StaticWindowMonkey(BasicMonkey): 
     
@@ -110,6 +114,8 @@ class StaticWindowMonkey(BasicMonkey):
                 
     def run(self): 
 
+        self.feeds = 1
+
         prototypes = [ numpy.concatenate(self.get_new_prototypes(self.exp) + self.get_prototypes(self.exp)) ]
 
         if self.window_size is not None and len(prototypes) > self.window_size:
@@ -117,13 +123,12 @@ class StaticWindowMonkey(BasicMonkey):
 
         self.exp = self.make_exp(prototypes)
 
-        print "Done."
+#        print "Done."
 
-        return self.feeds # TODO implement!!!
-        return new_exp 
+        return self.feeds 
 
        
-class GeneticMonkey(BasicMonkey):  # TODO implement double-feeding!
+class GeneticMonkey(BasicMonkey):
 
     def __init__(self, imprinter, instructions):
         self.imprinter = imprinter
@@ -132,6 +137,7 @@ class GeneticMonkey(BasicMonkey):  # TODO implement double-feeding!
         self.exp = self.make_exp(initial=True)
                 
     def run(self):
+        self.feeds = 1
         keyword, argument = self.instructions.pop(0).split()
         times = int(argument) 
         prototypes = self.get_prototypes(self.exp) 
@@ -148,14 +154,14 @@ class GeneticMonkey(BasicMonkey):  # TODO implement double-feeding!
             try:
                 new_prototypes = self.get_new_prototypes(self.exp, num=times)
                 if new_prototypes is not None:
-                    prototypes[:0] = new_prototypes
+                    prototypes = [ numpy.concatenate((new_prototypes, prototypes)) ]
             except:
                 pass
         elif keyword == "al":
             try:
                 new_prototypes = self.get_new_prototypes(self.exp, num=times)
                 if new_prototypes is not None:
-                    prototypes.extend(new_prototypes)
+                    prototypes = [ numpy.concatenate((prototypes, new_prototypes)) ]
             except:
                 pass
 
@@ -163,6 +169,8 @@ class GeneticMonkey(BasicMonkey):  # TODO implement double-feeding!
             self.set_prototypes(self.exp, prototypes) # put in DOR - that if this fails, will revert to old prototype results 
         except:
             pass
+
+        return self.feeds
 
 
             

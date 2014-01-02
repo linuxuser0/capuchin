@@ -5,11 +5,12 @@ from config import *
 def evaluate_monkey(times, monkey, genetic=False):  
     values = []
     n = 0
-    while n <= times:
+    while n < times:
         n += monkey.run()
-        results = try_get_results(monkey)
-        values.append(results)
-        print "Round {0}: {1}".format(n, results)
+        if n <= times:
+            results = try_get_results(monkey)
+            values.append(results)
+            print "Round {0}: {1}".format(n, results)
 
     average = float(sum(values))/float(len(values))
     print "AVERAGE: {0}".format(average)
@@ -21,7 +22,7 @@ def try_get_results(monkey, final=False):
     except IndexError: # implying faulty GA code
         return 0
 
-def get_imprinter(): # TODO implement!
+def get_imprinter(): 
     return imprinters.Imprinter(get_imagefeed(), INITIAL_LOCATION, SORTED_LOCATION, num_prototypes=NUM_PROTOTYPES) 
 
 def get_imagefeed():
@@ -61,7 +62,7 @@ def twiddle(max_size, delta): # Algorithm introduced by Sebastian Thrun (genius)
 
 def test_window(window): 
     times = 10
-    monkey = monkeys.StaticWindowMonkey(imprinter, window) 
+    monkey = monkeys.StaticWindowMonkey(get_imprinter(), window) 
     return evaluate_monkey(times, monkey) 
 
 
@@ -118,19 +119,32 @@ def screen(population):
     return sorted(population, key=get_fitness)[-10:]
 
 def get_fitness(string): # modify for average!
+    imprinter = get_imprinter()
     monkey = monkeys.GeneticMonkey(imprinter, string) 
     return evaluate_monkey(10, monkey, genetic=True) # ten is number of times to get avg.
         
 
 ###################################################################################
-
+"""
 points = []
-for n in range(1, 50):
+for n in [50]:
     print "TESTING NUM_PROTOTYPES {0}".format(n)
     points.append(basic(10, n))
 
 average = float(sum(points))/float(len(points)) 
 print "FINAL VALUE: {0}".format(average)
+"""
 
+#for _ in range(0, 20):
+#    print "TWIDDLE {0}".format(_)
+#    twiddle(50, 10)
+
+"""
+for n in range(1, 61):
+    t = test_window(n)
+    print n
+    print t
+"""    
+    
 #twiddle(10, 2) 
-#genetic(2)
+genetic(2)
