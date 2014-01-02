@@ -1,27 +1,16 @@
-# THIS IS IT!
-
 import random
 from capuchin import *
 from config import *
 
-test_window_times = 2 
 imagefeed = imagefeeds.ImageFeed(IMAGE_LOCATION, FEED_LOCATION) 
 imprinter = imprinters.Imprinter(imagefeed, INITIAL_LOCATION, SORTED_LOCATION, num_prototypes=NUM_PROTOTYPES) 
 
-def basic(times, monkey=None, genetic=False): # TODO twiddle over num_prototypes?
+def evaluate_monkey(times, monkey, genetic=False):  
     values = []
-    if monkey is None:
-        monkey = monkeys.BasicMonkey(imprinter, IMAGE_PACKAGE_SIZE)
-    for n in range(times): 
-        monkey.run()
-        final = (n == times)
-        if genetic:
-            try:
-                results = monkey.get_results(final=final)
-            except IndexError: # faulty psuedo ga code
-                results = 0
-        else:
-            results = monkey.get_results(final=final)
+    n = 0
+    while n <= times:
+        n += monkey.run()
+        results = try_get_results(monkey)
         values.append(results)
         print "Round {0}: {1}".format(n+1, results)
 
@@ -29,6 +18,18 @@ def basic(times, monkey=None, genetic=False): # TODO twiddle over num_prototypes
     print "AVERAGE: {0}".format(average)
     return average 
 
+def try_get_results(final=False):
+    try: 
+        return monkey.get_results(final)
+    except IndexError: # implying faulty GA code
+        return 0
+
+
+
+def basic(times, monkey=None, genetic=False): # TODO twiddle over num_prototypes?
+    monkey = monkeys.BasicMonkey(imprinter, IMAGE_PACKAGE_SIZE)
+    return evaluate_monkey(times, monkey)
+        
 def twiddle(max_size, delta): # Algorithm introduced by Sebastian Thrun (genius) on Udacity - thanks!
     print "Begin twiddle."
     window = random.randint(1, max_size) 
@@ -59,17 +60,25 @@ def twiddle(max_size, delta): # Algorithm introduced by Sebastian Thrun (genius)
 def test_window(window): 
     times = 10
     monkey = monkeys.StaticWindowMonkey(imprinter, window) 
-    return basic(times, monkey) #WHOA! fix to times
+    return evaluate_monkey(times, monkey) 
 
 
 def genetic(times): # TODO implement all time best!
     """Optimizes the instructions for GeneticMonkey."""
     population = get_initial_population()
+    all_best = None
+    all_best_fitness = -1
+
     for n in range(times):
         population = reproduce(population)
         population = screen(population)
+        fitnesses = map(get_fitness, population)
+        if max(fitnesses) > all_best_fitness:
+            all_best_fitness = max(fitnesses)
+            all_best = population[fitness.index(all_best_fitness)]
 
-    best = max(population, key=get_fitness)
+    print all_best
+    print all_best_fitness
 
 def get_initial_population():
     """Returns a list of strings of instructions."""
@@ -101,14 +110,14 @@ def reproduce(population):
 
             new_population.append(child)
 
-    return new_population
+    return random.sample(new_population, 100)
             
 def screen(population):
     return sorted(population, key=get_fitness)[-10:]
 
 def get_fitness(string): # modify for average!
     monkey = monkeys.GeneticMonkey(imprinter, string) 
-    return basic(10, monkey, genetic=True) # ten is number of times to get avg.
+    return evaluate_monkey(10, monkey, genetic=True) # ten is number of times to get avg.
         
 
 ###################################################################################

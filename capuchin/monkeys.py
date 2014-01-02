@@ -60,11 +60,10 @@ class BasicMonkey:
     def make_exp(self, initial=False, imprint=True, prototypes=None): 
         exp = ExperimentData()
         SetModel(exp)
-        if prototypes is None:
-            prototypes = self.imprinter.imprint(exp, initial=initial) 
-            # TODO try multiple times when not initial?
+        if prototypes is not None:
+            SetCorpus(exp, self.imprinter.sorted_location)
         else:
-            SetCorpus(exp) # FIX THIS LINE
+            prototypes = self.imprinter.imprint(exp, initial=initial) 
         exp = self.set_prototypes(exp, prototypes) 
 
         return exp
@@ -122,7 +121,7 @@ class StaticWindowMonkey(BasicMonkey):
         return new_exp 
 
        
-class GeneticMonkey(BasicMonkey): # TODO error handling - just swallow exceptions!
+class GeneticMonkey(BasicMonkey): 
 
     def __init__(self, imprinter, instructions):
         self.imprinter = imprinter
