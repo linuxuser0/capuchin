@@ -1,0 +1,24 @@
+AVERAGE: 0.0
+AVERAGE: 0.0
+AVERAGE: 0.07
+AVERAGE: 0.0
+AVERAGE: 0.14
+AVERAGE: 0.04
+AVERAGE: 0.04
+AVERAGE: 0.05
+AVERAGE: 0.37
+AVERAGE: 0.0
+NEW BEST SET!
+[['rl 3', 'af 1', 'rl 3', 'no 1', 'al 5', 'rl 2', 'af 4', 'rf 5', 'rf 3', 'rl 4'], ['rf 2', 'no 2', 'no 4', 'no 1', 'af 5', 'al 4', 'rf 3', 'al 2', 'no 5', 'al 2'], ['af 5', 'rf 3', 'af 3', 'af 5', 'af 5', 'al 2', 'no 5', 'no 3', 'rf 5', 'af 1'], ['rf 4', 'rl 3', 'rl 1', 'rf 3', 'rl 1', 'af 4', 'al 1', 'al 4', 'rl 5', 'af 5'], ['al 1', 'al 2', 'rf 2', 'al 3', 'no 1', 'no 4', 'al 2', 'rl 1', 'af 1', 'no 2'], ['al 5', 'rl 4', 'rl 5', 'af 1', 'rl 1', 'no 4', 'rf 2', 'rl 4', 'no 1', 'rl 2'], ['al 2', 'rl 4', 'af 1', 'al 4', 'rl 2', 'rl 2', 'no 4', 'no 4', 'rl 2', 'rl 5'], ['no 3', 'rl 3', 'no 4', 'rl 5', 'rl 4', 'rl 2', 'rl 2', 'af 3', 'rl 3', 'al 2'], ['al 4', 'af 4', 'no 3', 'af 5', 'no 1', 'af 5', 'al 4', 'af 1', 'rf 1', 'rf 2'], ['rf 2', 'al 5', 'rl 1', 'no 1', 'no 1', 'rl 4', 'af 4', 'no 2', 'af 2', 'rl 2']]
+[['rl 3', 'af 1', 'rl 3', 'no 1', 'al 5', 'rl 2', 'af 4', 'rf 5', 'rf 3', 'rl 4'], ['rf 2', 'no 2', 'no 4', 'no 1', 'af 5', 'al 4', 'rf 3', 'al 2', 'no 5', 'al 2'], ['af 5', 'rf 3', 'af 3', 'af 5', 'af 5', 'al 2', 'no 5', 'no 3', 'rf 5', 'af 1'], ['rf 4', 'rl 3', 'rl 1', 'rf 3', 'rl 1', 'af 4', 'al 1', 'al 4', 'rl 5', 'af 5'], ['al 1', 'al 2', 'rf 2', 'al 3', 'no 1', 'no 4', 'al 2', 'rl 1', 'af 1', 'no 2'], ['al 5', 'rl 4', 'rl 5', 'af 1', 'rl 1', 'no 4', 'rf 2', 'rl 4', 'no 1', 'rl 2'], ['al 2', 'rl 4', 'af 1', 'al 4', 'rl 2', 'rl 2', 'no 4', 'no 4', 'rl 2', 'rl 5'], ['no 3', 'rl 3', 'no 4', 'rl 5', 'rl 4', 'rl 2', 'rl 2', 'af 3', 'rl 3', 'al 2'], ['al 4', 'af 4', 'no 3', 'af 5', 'no 1', 'af 5', 'al 4', 'af 1', 'rf 1', 'rf 2'], ['rf 2', 'al 5', 'rl 1', 'no 1', 'no 1', 'rl 4', 'af 4', 'no 2', 'af 2', 'rl 2']]
+ROUND 0
+[['rl 3', 'af 1', 'rl 3', 'no 1', 'al 5', 'rl 2', 'af 4', 'rf 5', 'rf 3', 'rl 4'], ['rf 2', 'no 2', 'no 4', 'no 1', 'af 5', 'al 4', 'rf 3', 'al 2', 'no 5', 'al 2'], ['af 5', 'rf 3', 'af 3', 'af 5', 'af 5', 'al 2', 'no 5', 'no 3', 'rf 5', 'af 1'], ['rf 4', 'rl 3', 'rl 1', 'rf 3', 'rl 1', 'af 4', 'al 1', 'al 4', 'rl 5', 'af 5'], ['al 1', 'al 2', 'rf 2', 'al 3', 'no 1', 'no 4', 'al 2', 'rl 1', 'af 1', 'no 2'], ['al 5', 'rl 4', 'rl 5', 'af 1', 'rl 1', 'no 4', 'rf 2', 'rl 4', 'no 1', 'rl 2'], ['al 2', 'rl 4', 'af 1', 'al 4', 'rl 2', 'rl 2', 'no 4', 'no 4', 'rl 2', 'rl 5'], ['no 3', 'rl 3', 'no 4', 'rl 5', 'rl 4', 'rl 2', 'rl 2', 'af 3', 'rl 3', 'al 2'], ['al 4', 'af 4', 'no 3', 'af 5', 'no 1', 'af 5', 'al 4', 'af 1', 'rf 1', 'rf 2'], ['rf 2', 'al 5', 'rl 1', 'no 1', 'no 1', 'rl 4', 'af 4', 'no 2', 'af 2', 'rl 2']]
+FITNESSES: [0.0, 0.0, 0.06999999999999999, 0.0, 0.13999999999999999, 0.04, 0.04, 0.05, 0.37, 0.0]
+---
+SCREENING
+REPRODUCING
+---
+AVERAGE: 0.07
+AVERAGE: 0.06
+AVERAGE: 0.06
+AVERAGE: 0.05

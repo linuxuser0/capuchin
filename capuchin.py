@@ -6,11 +6,12 @@ def evaluate_monkey(times, monkey, genetic=False):
     values = []
     n = 0
     while n < times:
+        print n
         n += monkey.run()
         if n <= times:
             results = try_get_results(monkey)
             values.append(results)
-            print "Round {0}: {1}".format(n, results)
+            #print "Round {0}: {1}".format(n, results)
 
     average = float(sum(values))/float(len(values))
     print "AVERAGE: {0}".format(average)
@@ -71,36 +72,56 @@ def genetic(times):
     population = get_initial_population()
     all_best = None
     all_best_fitness = -1
+    print population
 
     for n in range(times):
-        population = reproduce(population)
-        population = screen(population)
-        fitnesses = map(get_fitness, population)
+        fitnesses = [get_fitness(p[:]) for p in population]
         if max(fitnesses) > all_best_fitness:
+            print "NEW BEST SET!"
             all_best_fitness = max(fitnesses)
-            all_best = population[fitness.index(all_best_fitness)]
+            all_best = population[fitnesses.index(all_best_fitness)]
 
-    print all_best
-    print all_best_fitness
+        print "ROUND {0}".format(n)
+        print population
+        print "FITNESSES: {0}".format(fitnesses)
 
-def get_initial_population():
+        print "---"
+
+        print "SCREENING"
+        population = screen(population, fitnesses)
+        if all_best is not None:
+            population.append(all_best)
+            population.append(all_best)
+        print "REPRODUCING"
+        population = reproduce(population)
+
+        print "---"
+                
+    print "ALL TIME BEST: {0}".format(all_best)
+    print "FITNESS: {0}".format(all_best_fitness)
+
+def get_initial_population(preset=True, size=4):
     """Returns a list of strings of instructions."""
-    population_size = 10
-    instructions_per = 10
-    population = []
-    for p in range(population_size): 
-        instructions = []
-        for i in range(instructions_per):
-            keywords = ["rf", "rl", "af", "al", "no"]
-            key = random.choice(keywords)
-            value = random.randint(1, 5) # fine tune for results 
-            instructions.append("{0} {1}".format(key, value))
-        population.append(instructions)
+    if not preset:
+        instructions_per = 10
+        population = []
+        for p in range(size): 
+            instructions = []
+            for i in range(instructions_per):
+                keywords = ["rf", "rl", "af", "al", "no"]
+                key = random.choice(keywords)
+                value = random.randint(1, 5) # fine tune for results 
+                instructions.append("{0} {1}".format(key, value))
+            population.append(instructions)
+    else:
+        population =[ ['no 1'] * 10, ['al 1'] * 9 + ['rf 2'], ['af 1'] * 8 + ['rl 1'] * 2, 
+                get_initial_population(preset=False, size=1)[0] ]
+    
+    print population
 
     return population
 
 
-    return 
 def reproduce(population):
     """Reproduces the instruction strings randomly, via genetic algorithm."""
     new_population = []
@@ -113,10 +134,12 @@ def reproduce(population):
 
             new_population.append(child)
 
-    return random.sample(new_population, 100)
+    return random.sample(new_population, 8)
             
-def screen(population):
-    return sorted(population, key=get_fitness)[-10:]
+def screen(population, fitnesses):
+    mapping = zip(population, fitnesses)
+    best = sorted(mapping, key=lambda x: x[1])[-4:]
+    return map(lambda x: x[0], best)
 
 def get_fitness(string): # modify for average!
     imprinter = get_imprinter()
@@ -140,11 +163,11 @@ print "FINAL VALUE: {0}".format(average)
 #    twiddle(50, 10)
 
 """
-for n in range(1, 61):
+for n in range(16, 61):
     t = test_window(n)
     print n
     print t
-"""    
+"""
     
 #twiddle(10, 2) 
-genetic(2)
+genetic(5)

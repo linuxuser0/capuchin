@@ -15,7 +15,7 @@ class BasicMonkey:
         self.imprinter = imprinter
         self.image_package_size = image_package_size
         self.num_prototypes = num_prototypes
-        self.pool = MakePool('s')
+        self.pool = MulticorePool()
         self.exp = self.make_exp(initial=True, num_prototypes=num_prototypes)
 
     def run(self):
@@ -24,27 +24,34 @@ class BasicMonkey:
 
     def get_results(self, final=False): # Based on Mick Thomure's code - thanks! 
 
+        print "GETTING RESULTS!"
+
         exp = self.exp
 
-        print self.get_prototypes(self.exp)
+        #print self.get_prototypes(self.exp)
 
         ev = exp.evaluation[0]
         model = exp.extractor.model
 
-        if final:
-            loc = self.imprinter.imagefeed.image_location
-            image_files = []
-            for subdir in os.listdir(loc):
-                image_names = os.listdir(os.path.join(loc, subdir))
-                image_files.extend([os.path.join(loc, subdir, name) for name in image_names])
-        else:
-            loc = self.imprinter.imagefeed.feed_location 
-            image_names = os.listdir(loc)
-            image_files = [os.path.join(loc, name) for name in image_names]
+        #if final:
+        #    loc = self.imprinter.imagefeed.image_location
+        #    image_files = []
+        #    for subdir in os.listdir(loc):
+        #        image_names = os.listdir(os.path.join(loc, subdir))
+        #        image_files.extend([os.path.join(loc, subdir, name) for name in image_names])
+        #else:
+        loc = self.imprinter.imagefeed.feed_location 
+        image_names = os.listdir(loc)
+        image_files = [os.path.join(loc, name) for name in image_names]
+        
+        print len(image_files)
                     
+        print "BUILDING IMAGES"
         images = map(model.MakeState, image_files) 
         builder = Callback(BuildLayer, model, ev.layers, save_all=False)
         states = self.pool.map(builder, images)
+
+        print "CATEGORIZING!"
 
         features = ExtractFeatures(ev.layers, states)
         labels = ev.results.classifier.predict(features)
@@ -137,6 +144,8 @@ class GeneticMonkey(BasicMonkey):
         self.exp = self.make_exp(initial=True)
                 
     def run(self):
+        print "RUNNING!"
+        
         self.feeds = 1
         keyword, argument = self.instructions.pop(0).split()
         times = int(argument) 
@@ -165,6 +174,7 @@ class GeneticMonkey(BasicMonkey):
             except:
                 pass
 
+        print "SETTING PROTOTYPES!"
         try:
             self.set_prototypes(self.exp, prototypes) # put in DOR - that if this fails, will revert to old prototype results 
         except:
