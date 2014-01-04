@@ -6,7 +6,7 @@ def evaluate_monkey(times, monkey, genetic=False):
     values = []
     n = 0
     while n < times:
-        print n
+#        print n
         n += monkey.run()
         if n <= times:
             results = try_get_results(monkey)
@@ -148,26 +148,23 @@ def get_fitness(string): # modify for average!
         
 
 ###################################################################################
-"""
+'''
 points = []
-for n in [50]:
+for n in range(57, 61):
     print "TESTING NUM_PROTOTYPES {0}".format(n)
     points.append(basic(10, n))
 
 average = float(sum(points))/float(len(points)) 
 print "FINAL VALUE: {0}".format(average)
-"""
-
+'''
 #for _ in range(0, 20):
 #    print "TWIDDLE {0}".format(_)
 #    twiddle(50, 10)
 
-"""
-for n in range(16, 61):
+for n in range(2, 61):
     t = test_window(n)
     print n
     print t
-"""
     
 #twiddle(10, 2) 
-genetic(5)
+#genetic(5)

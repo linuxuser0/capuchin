@@ -34,6 +34,8 @@ class Imprinter:
             corpus = self.sorted_location
 
         SetCorpus(exp, corpus)
+        print exp
+        print num_prototypes
         MakePrototypes(exp, num_prototypes, algorithm="imprint", pool=MakePool('s'))
         return self.get_prototypes(exp)
 

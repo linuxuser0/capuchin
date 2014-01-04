@@ -15,7 +15,7 @@ class BasicMonkey:
         self.imprinter = imprinter
         self.image_package_size = image_package_size
         self.num_prototypes = num_prototypes
-        self.pool = MulticorePool()
+        self.pool = MakePool('s') 
         self.exp = self.make_exp(initial=True, num_prototypes=num_prototypes)
 
     def run(self):
@@ -24,7 +24,7 @@ class BasicMonkey:
 
     def get_results(self, final=False): # Based on Mick Thomure's code - thanks! 
 
-        print "GETTING RESULTS!"
+#        print "GETTING RESULTS!"
 
         exp = self.exp
 
@@ -46,12 +46,12 @@ class BasicMonkey:
         
         print len(image_files)
                     
-        print "BUILDING IMAGES"
+#        print "BUILDING IMAGES"
         images = map(model.MakeState, image_files) 
         builder = Callback(BuildLayer, model, ev.layers, save_all=False)
         states = self.pool.map(builder, images)
 
-        print "CATEGORIZING!"
+#        print "CATEGORIZING!"
 
         features = ExtractFeatures(ev.layers, states)
         labels = ev.results.classifier.predict(features)
@@ -75,7 +75,7 @@ class BasicMonkey:
             SetCorpus(exp, self.imprinter.sorted_location)
         else:
             prototypes = self.imprinter.imprint(exp, initial=initial, num_prototypes=num_prototypes) 
-        exp = self.set_prototypes(exp, prototypes) 
+        exp = self.set_prototypes(exp, prototypes, initial=initial) 
 
         return exp
 
@@ -85,7 +85,9 @@ class BasicMonkey:
         self.set_prototypes(exp, prototypes)
         return exp
 
-    def set_prototypes(self, exp, prototypes):
+    def set_prototypes(self, exp, prototypes, initial=False):
+        if not initial:
+            SetCorpus(exp, self.imprinter.sorted_location)
         exp.extractor.model.s2_kernels = prototypes
         ComputeActivation(exp, Layer.S2, self.pool)
         TrainAndTestClassifier(exp, Layer.S2)
@@ -94,7 +96,7 @@ class BasicMonkey:
     def get_prototypes(self, exp):
         return exp.extractor.model.s2_kernels
 
-    def get_new_prototypes(self, exp, images=5, reset=True, num=None):
+    def get_new_prototypes(self, exp, images=5, reset=True, num=10):
         try:
             self.imprinter.imagefeed.feed(images, reset) 
             self.imprinter.categorize(exp)
@@ -121,16 +123,21 @@ class StaticWindowMonkey(BasicMonkey):
                 
     def run(self): 
 
+        print "HERE!"
+        
         self.feeds = 1
+
+        print type(self.exp.extractor.training_set)
+        print self.exp.corpus.training_set
 
         prototypes = [ numpy.concatenate(self.get_new_prototypes(self.exp) + self.get_prototypes(self.exp)) ]
 
         if self.window_size is not None and len(prototypes) > self.window_size:
             numpy.delete(prototypes, numpy.s_[3:])
 
-        self.exp = self.make_exp(prototypes)
+        self.exp = self.set_prototypes(self.exp, prototypes) 
 
-#        print "Done."
+        print "Done."
 
         return self.feeds 
 
@@ -144,7 +151,7 @@ class GeneticMonkey(BasicMonkey):
         self.exp = self.make_exp(initial=True)
                 
     def run(self):
-        print "RUNNING!"
+#        print "RUNNING!"
         
         self.feeds = 1
         keyword, argument = self.instructions.pop(0).split()
@@ -174,9 +181,9 @@ class GeneticMonkey(BasicMonkey):
             except:
                 pass
 
-        print "SETTING PROTOTYPES!"
+#        print "SETTING PROTOTYPES!"
         try:
-            self.set_prototypes(self.exp, prototypes) # put in DOR - that if this fails, will revert to old prototype results 
+            self.exp = self.set_prototypes(self.exp, prototypes) # put in DOR - that if this fails, will revert to old prototype results 
         except:
             pass
 
