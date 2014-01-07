@@ -58,7 +58,6 @@ def twiddle(max_size, delta): # Algorithm introduced by Sebastian Thrun (genius)
                 # cry for mercy
                 window += delta
                 delta = int(delta * 0.9)
-
     return window, best_accuracy
 
 def test_window(window): 

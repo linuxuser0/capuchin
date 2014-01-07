@@ -47,6 +47,7 @@ class BasicMonkey:
         print len(image_files)
                     
 #        print "BUILDING IMAGES"
+#       
         images = map(model.MakeState, image_files) 
         builder = Callback(BuildLayer, model, ev.layers, save_all=False)
         states = self.pool.map(builder, images)
@@ -75,6 +76,7 @@ class BasicMonkey:
             SetCorpus(exp, self.imprinter.sorted_location)
         else:
             prototypes = self.imprinter.imprint(exp, initial=initial, num_prototypes=num_prototypes) 
+
         exp = self.set_prototypes(exp, prototypes, initial=initial) 
 
         return exp
@@ -86,8 +88,8 @@ class BasicMonkey:
         return exp
 
     def set_prototypes(self, exp, prototypes, initial=False):
-        if not initial:
-            SetCorpus(exp, self.imprinter.sorted_location)
+        #if not initial:
+        #    SetCorpus(exp, self.imprinter.sorted_location)
         exp.extractor.model.s2_kernels = prototypes
         ComputeActivation(exp, Layer.S2, self.pool)
         TrainAndTestClassifier(exp, Layer.S2)
@@ -98,7 +100,7 @@ class BasicMonkey:
 
     def get_new_prototypes(self, exp, images=5, reset=True, num=10):
         try:
-            self.imprinter.imagefeed.feed(images, reset) 
+            self.imprinter.imagefeed.feed(images, reset=reset) 
             self.imprinter.categorize(exp)
             prototypes = self.imprinter.imprint(exp, num_prototypes=num)
 
@@ -127,15 +129,14 @@ class StaticWindowMonkey(BasicMonkey):
         
         self.feeds = 1
 
-        print type(self.exp.extractor.training_set)
         print self.exp.corpus.training_set
 
-        prototypes = [ numpy.concatenate(self.get_new_prototypes(self.exp) + self.get_prototypes(self.exp)) ]
+        prototypes = [ numpy.concatenate((self.get_new_prototypes(self.exp), self.get_prototypes(self.exp))) ]
 
         if self.window_size is not None and len(prototypes) > self.window_size:
             numpy.delete(prototypes, numpy.s_[3:])
 
-        self.exp = self.set_prototypes(self.exp, prototypes) 
+        self.exp = self.set_prototypes(prototypes)
 
         print "Done."
 

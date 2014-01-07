@@ -20,6 +20,9 @@ class Imprinter:
     def imprint(self, exp, initial=False, testing=False, num_prototypes=None):
         """Imprints and returns a set of visual cells given a series of images."""
 
+        print initial
+        print self.exp.corpus.paths
+
         if num_prototypes is None:
             num_prototypes = self.num_prototypes
         
@@ -34,8 +37,6 @@ class Imprinter:
             corpus = self.sorted_location
 
         SetCorpus(exp, corpus)
-        print exp
-        print num_prototypes
         MakePrototypes(exp, num_prototypes, algorithm="imprint", pool=MakePool('s'))
         return self.get_prototypes(exp)
 
