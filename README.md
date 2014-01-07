@@ -15,5 +15,4 @@ A. Torralba and A. Oliva (2003). Statistics of natural image categories. In Netw
 Credit to A. Torralba and A. Olivia (2003) for providing the image corpus for this project.
 
 
-* * *
 
