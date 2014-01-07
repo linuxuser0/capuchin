@@ -20,6 +20,8 @@ class Imprinter:
     def imprint(self, exp, initial=False, testing=False, num_prototypes=None):
         """Imprints and returns a set of visual cells given a series of images."""
 
+        exp = copy.copy(exp) # make sure we don't hurt our original object!
+
         print initial
         print self.exp.corpus.paths
 
@@ -36,7 +38,22 @@ class Imprinter:
             #count = self.image_package_size
             corpus = self.sorted_location
 
+        exp.corpus.training_set = None
+        exp.extractor.training_set = None # to assure training_set is automagically adjusted for size
         SetCorpus(exp, corpus)
+
+        print exp.corpus.paths
+        print exp.corpus.training_set
+        print exp.extractor.training_set
+
+        for i in numpy.where(exp.extractor.training_set)[0]:
+            print i
+        print "ASDF"
+        for i in numpy.where(exp.corpus.training_set)[0]:
+            print i
+        print "YARG"
+        print len(exp.corpus.paths)
+
         MakePrototypes(exp, num_prototypes, algorithm="imprint", pool=MakePool('s'))
         return self.get_prototypes(exp)
 

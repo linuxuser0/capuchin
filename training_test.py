@@ -1,3 +1,4 @@
+import numpy
 from glimpse.experiment import *
 from glimpse.pools import *
 from capuchin import *
@@ -18,7 +19,9 @@ imprinter.categorize(exp)
 before = exp.extractor.model.s2_kernels
 new_prototypes = imprinter.imprint(exp)
 old_prototypes = exp.extractor.model.s2_kernels
-print before == old_prototypes # should be true!
+print before
+raw_input("ready?")
+print old_prototypes
 
 joint_prototypes = [ numpy.concatenate((new_prototypes, old_prototypes)) ]
 exp.extractor.model.s2_kernels = prototypes

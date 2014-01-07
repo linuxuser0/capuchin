@@ -1,3 +1,4 @@
+import copy
 import numpy
 import glob
 from imprinters import Imprinter
@@ -143,7 +144,7 @@ class StaticWindowMonkey(BasicMonkey):
         return self.feeds 
 
        
-class GeneticMonkey(BasicMonkey):
+class GeneticMonkey(BasicMonkey):  
 
     def __init__(self, imprinter, instructions):
         self.imprinter = imprinter
