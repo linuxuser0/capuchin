@@ -238,10 +238,11 @@ print "FINAL VALUE: {0}".format(average)
 #for _ in range(0, 20):
 #    print "TWIDDLE {0}".format(_)
 #    twiddle(50, 10)
-
+'''
 for n in range(2, 61): 
     t = test_window(n)
     print "Round {0}: {1}".format(n, t)
+'''
     
 #twiddle(10, 2) 
-#genetic(5)
+genetic(5)

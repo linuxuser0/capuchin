@@ -49,6 +49,9 @@ class BasicMonkey:
                     
 #        print "BUILDING IMAGES"
 #       
+        
+        print len(image_files)
+
         images = map(model.MakeState, image_files) 
         builder = Callback(BuildLayer, model, ev.layers, save_all=False)
         states = self.pool.map(builder, images)
@@ -56,6 +59,13 @@ class BasicMonkey:
 #        print "CATEGORIZING!"
 
         features = ExtractFeatures(ev.layers, states)
+
+        mean = ev.results.classifier.steps[0][1].mean_
+
+        print "X: {0}".format(features.shape)
+        print "Mean: {0}".format(mean.shape)
+        print "Difference: {0}".format((features-mean).shape)
+
         labels = ev.results.classifier.predict(features)
         classes = dict(zip(image_names, exp.corpus.class_names[labels]))
 
