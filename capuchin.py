@@ -61,7 +61,7 @@ def twiddle(max_size, delta): # Algorithm introduced by Sebastian Thrun (genius)
     return window, best_accuracy
 
 def test_window(window): 
-    times = 10
+    times = 10 
     monkey = monkeys.StaticWindowMonkey(get_imprinter(), window) 
     return evaluate_monkey(times, monkey) 
 
@@ -144,7 +144,85 @@ def get_fitness(string): # modify for average!
     imprinter = get_imprinter()
     monkey = monkeys.GeneticMonkey(imprinter, string) 
     return evaluate_monkey(10, monkey, genetic=True) # ten is number of times to get avg.
-        
+'''
+def try_test_window(n, tries=0):
+    try:
+        t = test_window(n)
+    except Exception, e:
+        error = str(e)
+        if "Exp refuses to categorize one class" in error:
+            if tries <= MAX_TRIES:
+                print "Retrying..."
+                print "ISSUE:"
+                print error
+                tries += 1
+                t = try_test_window(n, tries=tries)
+            else:
+                print "Failed."
+                return "FAILURE"
+    
+    return t
+'''
+
+def make_window(window):
+    return monkeys.StaticWindowMonkey(get_imprinter(), window)
+
+'''
+
+def evaluate_window(window):
+    times = 10
+    values = []
+    n = 0
+    while n < times:
+        print "STEP! {0} < 10".format(n)
+        t, results = test_window(window)
+
+
+    average = float(sum(values))/float(len(values))
+    print "AVERAGE: {0}".format(average)
+    return average 
+
+'''
+
+def test_window(window):
+    monkey = make_window(window)
+    values = []
+    runs = 0
+    while runs <= 10:
+        try:
+            print "Running!"
+            runs += monkey.run(remaining=(10-runs))
+            print "Obtaining results."
+            values.append(monkey.get_results())
+        except Exception, e:
+            error = str(e)
+            if "sample" in error:
+                print "Imprinter - swapped."
+                monkey.imprinter = get_imprinter()
+
+    return float(sum(values))/float(len(values))
+
+'''
+
+def try_monkey_run(m, tries=0):
+    try:
+        n = m.run()
+        print "Success!"
+    except Exception, e:
+        if "Exp refuses to categorize one class" in str(e) or "larger than population":
+            if tries <= MAX_TRIES:
+                print "Retrying..."
+                print str(e)
+                tries += 1
+                n = try_monkey_run(m, tries=tries)
+            else:
+                print "Failed."
+                return None
+        else:
+            raise
+    return n 
+
+'''
 
 ###################################################################################
 '''
@@ -160,10 +238,12 @@ print "FINAL VALUE: {0}".format(average)
 #    print "TWIDDLE {0}".format(_)
 #    twiddle(50, 10)
 
-for n in range(2, 61):
+for n in range(2, 61): # 61
     t = test_window(n)
+    print "RESULTS!"
     print n
     print t
+    print "--------"
     
 #twiddle(10, 2) 
 #genetic(5)

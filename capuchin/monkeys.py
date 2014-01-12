@@ -45,7 +45,7 @@ class BasicMonkey:
         image_names = os.listdir(loc)
         image_files = [os.path.join(loc, name) for name in image_names]
         
-        print len(image_files)
+        #print len(image_files)
                     
 #        print "BUILDING IMAGES"
 #       
@@ -97,23 +97,36 @@ class BasicMonkey:
         return exp
 
     def get_prototypes(self, exp):
-        return exp.extractor.model.s2_kernels
+        return exp.extractor.model.s2_kernels[0]
 
-    def get_new_prototypes(self, exp, images=5, reset=True, num=10):
+    def get_new_prototypes(self, exp, images=5, reset=True, num=10, n=0):
+        print "Getting new prototypes..."
         try:
+            print "Feeding..."
             self.imprinter.imagefeed.feed(images, reset=reset) 
+            print "Categorizing..."
             self.imprinter.categorize(exp)
+            print "Imprinting..."
             prototypes = self.imprinter.imprint(exp, num_prototypes=num)
 
         except Exception, e:
-            if "No images found in directory" in str(e):
-                prototypes = self.get_new_prototypes(exp, reset=False) 
+            if self.feeds >= self.remaining:
+                raise Exception, "Out of remaining feeds." 
+            
+            if "No images found in directory" in str(e) or "Need at least two examples of class" in str(e):
+                print "Reattempting prototypes"
+                print str(e)
+                if n == 3:
+                    print "Not reattempting..."
+                    raise Exception, "Exp refuses to categorize one class"
+                prototypes = self.get_new_prototypes(exp, reset=False, n=(n+1)) 
                 #print "Timestep skipped."
                 self.feeds += 1
             else: 
                 raise
 
-        return prototypes
+        print "Completed."
+        return prototypes[0] 
 
 class StaticWindowMonkey(BasicMonkey): 
     
@@ -122,25 +135,28 @@ class StaticWindowMonkey(BasicMonkey):
         self.window_size = window_size
         self.pool = MakePool('s')
         self.exp = self.make_exp(initial=True)
-        self.feeds = 1 
                 
-    def run(self): 
+    def run(self, remaining=100): 
+        self.remaining = remaining
+        self.feeds = 1 # typical reset
 
-        print "HERE!"
-        
-        self.feeds = 1
-
-        print self.exp.corpus.training_set
-
-        prototypes = [ numpy.concatenate((self.get_new_prototypes(self.exp), self.get_prototypes(self.exp))) ]
-
+        try:
+            new_prototypes = self.get_new_prototypes(self.exp)
+        except Exception, e:
+            if "remaining feeds" in str(e):
+                return self.remaining
+            else:
+                raise
+            
+        current_prototypes = self.get_prototypes(self.exp)
+        prototypes = [ new_prototypes + current_prototypes ] 
         if self.window_size is not None and len(prototypes) > self.window_size:
-            numpy.delete(prototypes, numpy.s_[3:])
+            prototypes = prototypes[-self.window_size:] 
 
-        self.exp = self.set_prototypes(prototypes)
+        self.exp = self.set_prototypes(self.exp, prototypes)
 
         print "Done."
-
+        print self.feeds
         return self.feeds 
 
        
@@ -172,7 +188,7 @@ class GeneticMonkey(BasicMonkey):
             try:
                 new_prototypes = self.get_new_prototypes(self.exp, num=times)
                 if new_prototypes is not None:
-                    prototypes = [ numpy.concatenate((new_prototypes, prototypes)) ]
+                    prototypes = [ numpy.concatenate((new_prototypes, prototypes)) ] # TODO REPLACE WITH ABOVE SYNTAX
             except:
                 pass
         elif keyword == "al":

@@ -1,4 +1,4 @@
-import os, numpy
+import os, numpy, copy
 from glimpse.experiment import *
 from glimpse.models import *
 from glimpse.pools import *
@@ -18,12 +18,12 @@ class Imprinter:
         self.pool = MakePool('s')
         
     def imprint(self, exp, initial=False, testing=False, num_prototypes=None):
-        """Imprints and returns a set of visual cells given a series of images."""
+        """Im#prints and returns a set of visual cells given a series of images."""
 
         exp = copy.copy(exp) # make sure we don't hurt our original object!
 
-        print initial
-        print self.exp.corpus.paths
+        #print initial
+        #print self.exp.corpus.paths
 
         if num_prototypes is None:
             num_prototypes = self.num_prototypes
@@ -42,17 +42,17 @@ class Imprinter:
         exp.extractor.training_set = None # to assure training_set is automagically adjusted for size
         SetCorpus(exp, corpus)
 
-        print exp.corpus.paths
-        print exp.corpus.training_set
-        print exp.extractor.training_set
+        #print exp.corpus.paths
+        #print exp.corpus.training_set
+        #print exp.extractor.training_set
 
-        for i in numpy.where(exp.extractor.training_set)[0]:
-            print i
-        print "ASDF"
-        for i in numpy.where(exp.corpus.training_set)[0]:
-            print i
-        print "YARG"
-        print len(exp.corpus.paths)
+        #for i in numpy.where(exp.extractor.training_set)[0]:
+            #print i
+        #print "ASDF"
+        #for i in numpy.where(exp.corpus.training_set)[0]:
+            #print i
+        #print "YARG"
+        #print len(exp.corpus.paths)
 
         MakePrototypes(exp, num_prototypes, algorithm="imprint", pool=MakePool('s'))
         return self.get_prototypes(exp)

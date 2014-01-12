@@ -24,7 +24,10 @@ class ImageFeed:
     def transfer_images(self, image_subdirs, location, folders=True, predicted=False, reset=True):
         image_files = []
         if reset:
+            #print "CLEARING {0}".format(location)
             self._reset_directory(location, folders)
+
+        #print "TRANFERING to {0}".format(location)
 
         for image in image_subdirs:
 
@@ -69,11 +72,23 @@ class ImageFeed:
         #print unused_images
 
         return unused_images
+    
+    def _get_all_images(self):
+        images = {}
+        subdirectories = os.listdir(self.image_location)
+
+        for subdirectory in subdirectories:
+            full_subdirectory_path = os.path.join(self.image_location, subdirectory)
+            all_files = os.listdir(full_subdirectory_path)
+            all_images = [ image for image in all_files if os.path.splitext(image)[1].lower() in self.ACCEPTED_FILETYPES ]
+            images[subdirectory] = all_images      
+
+        return images
 
     def _get_random_image_sample(self, size):
         """Gets a random sample of images of size from each subdirectory in image_location, returning a dictionary."""
         images = {}
-        unused_images = self._get_unused_images()
+        unused_images = self._get_unused_images() 
         
         for subdirectory in unused_images: 
             subdir_images = random.sample(unused_images[subdirectory], size) 
@@ -97,6 +112,9 @@ class ImageFeed:
             shutil.rmtree(directory)
         except OSError:
             pass
+
+        #print "DIRECTORY {0} DELETED".format(directory)
+        #print "FOLDERS: {0}".format(folders)
 
         os.makedirs(directory)
         if folders:
