@@ -116,7 +116,7 @@ class BasicMonkey:
             if "No images found in directory" in str(e) or "Need at least two examples of class" in str(e):
                 print "Reattempting prototypes"
                 print str(e)
-                if n == 3:
+                if n == 2:
                     print "Not reattempting..."
                     raise Exception, "Exp refuses to categorize one class"
                 prototypes = self.get_new_prototypes(exp, reset=False, n=(n+1)) 
@@ -145,6 +145,8 @@ class StaticWindowMonkey(BasicMonkey):
         except Exception, e:
             if "remaining feeds" in str(e):
                 return self.remaining
+            elif "refuses" in str(e):
+                return 3 
             else:
                 raise
             
@@ -156,7 +158,7 @@ class StaticWindowMonkey(BasicMonkey):
         self.exp = self.set_prototypes(self.exp, prototypes)
 
         print "Done."
-        print self.feeds
+        #print self.feeds
         return self.feeds 
 
        

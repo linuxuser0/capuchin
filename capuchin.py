@@ -188,7 +188,8 @@ def test_window(window):
     monkey = make_window(window)
     values = []
     runs = 0
-    while runs <= 10:
+    while runs < 10:
+        print "Run {0} begun.".format(runs)
         try:
             print "Running!"
             runs += monkey.run(remaining=(10-runs))
@@ -238,12 +239,9 @@ print "FINAL VALUE: {0}".format(average)
 #    print "TWIDDLE {0}".format(_)
 #    twiddle(50, 10)
 
-for n in range(2, 61): # 61
+for n in range(2, 61): 
     t = test_window(n)
-    print "RESULTS!"
-    print n
-    print t
-    print "--------"
+    print "Round {0}: {1}".format(n, t)
     
 #twiddle(10, 2) 
 #genetic(5)
