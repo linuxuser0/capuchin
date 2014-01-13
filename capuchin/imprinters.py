@@ -3,6 +3,7 @@ from glimpse.experiment import *
 from glimpse.models import *
 from glimpse.pools import *
 from imagefeeds import ImageFeed 
+from utils import *
 
 class Imprinter:
     """A simple class that accepts an imagefeed and returns imprinted visual cells from it."""
@@ -17,42 +18,12 @@ class Imprinter:
         self.layers = "S2"
         self.pool = MakePool('s')
         
-    def imprint(self, exp, initial=False, testing=False, num_prototypes=None):
+    def imprint(self, prototypes=None, initial=False, num_prototypes=None) 
         """Im#prints and returns a set of visual cells given a series of images."""
 
-        exp = copy.copy(exp) # make sure we don't hurt our original object!
-
-        #print initial
-        #print self.exp.corpus.paths
-
-        if num_prototypes is None:
-            num_prototypes = self.num_prototypes
-        
-        if initial:
-            #count = self.initial_image_count
-            corpus = self.initial_location
-        elif testing:
-            #count = len(os.listdir(self.imagefeed.image_location))
-            corpus = self.imagefeed.image_location 
-        else:
-            #count = self.image_package_size
-            corpus = self.sorted_location
-
-        exp.corpus.training_set = None
-        exp.extractor.training_set = None # to assure training_set is automagically adjusted for size
-        SetCorpus(exp, corpus)
-
-        #print exp.corpus.paths
-        #print exp.corpus.training_set
-        #print exp.extractor.training_set
-
-        #for i in numpy.where(exp.extractor.training_set)[0]:
-            #print i
-        #print "ASDF"
-        #for i in numpy.where(exp.corpus.training_set)[0]:
-            #print i
-        #print "YARG"
-        #print len(exp.corpus.paths)
+        num_prototypes = self.num_prototypes if num_prototypes is None
+        corpus = self.initial_location if initial else self.sorted_location
+        exp = make_exp(prototypes, corpus=corpus)
 
         MakePrototypes(exp, num_prototypes, algorithm="imprint", pool=MakePool('s'))
         return self.get_prototypes(exp)
@@ -61,7 +32,7 @@ class Imprinter:
        return exp.extractor.model.s2_kernels
 
     def categorize(self, exp):
-        categories = self._get_categories(exp)
+        categories = classify_images()
         self.imagefeed._reset_directory(self.sorted_location)
         self.imagefeed.transfer_images(categories, self.sorted_location, predicted=True)
        

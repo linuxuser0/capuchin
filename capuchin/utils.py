@@ -6,6 +6,14 @@ from glimpse.pools import *
 TEST_FEED = "test/test_feed"
 LAYER = Layer.C2
 
+def make_exp(protos, corpus=None):
+    exp = ExperimentData()
+    SetModel(exp)
+    if corpus:
+        SetCorpus(exp, corpus)
+    return exp
+
+
 def test_prototypes(protos):
     # Assumes images are in test_feed.
     mask = ChooseTrainingSet(labels, train_size=0.5)

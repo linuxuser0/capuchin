@@ -5,6 +5,7 @@ from imprinters import Imprinter
 from imagefeeds import ImageFeed
 from glimpse.pools import *
 from glimpse.experiment import *
+from utils import *
 
 """A collection of classes which utilize Imprinter instances to dynamically adapt HMAX models."""
 
@@ -18,7 +19,7 @@ class BasicMonkey:
         self.num_prototypes = num_prototypes
         self.pool = MakePool('s') 
         #self.exp = self.make_exp(initial=True, num_prototypes=num_prototypes)
-        self.protos = self.imprinter.imprint(exp, initial=True, num_prototypes=num_prototypes)
+        self.protos = self.imprinter.imprint(initial=True, num_prototypes=num_prototypes)
 
     def run(self):
         self.imprinter.imagefeed.feed(self.image_package_size) 
@@ -117,7 +118,7 @@ class BasicMonkey:
         print "Completed."
         return prototypes[0] 
 
-    def try_get_new_protos(self, exp, num=10)
+    def try_get_new_protos(self, exp, num=10):
         try:
             new_prototypes = self.get_new_prototypes(exp, num)
         except Exception, e:
@@ -134,7 +135,6 @@ class StaticWindowMonkey(BasicMonkey):
         self.imprinter = imprinter 
         self.window_size = window_size
         self.pool = MakePool('s')
-        self.exp = self.make_exp(initial=True)
                 
     def run(self, remaining=100): 
         self.remaining = remaining
