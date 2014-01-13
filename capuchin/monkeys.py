@@ -17,49 +17,29 @@ class BasicMonkey:
         self.image_package_size = image_package_size
         self.num_prototypes = num_prototypes
         self.pool = MakePool('s') 
-        self.exp = self.make_exp(initial=True, num_prototypes=num_prototypes)
+        #self.exp = self.make_exp(initial=True, num_prototypes=num_prototypes)
+        self.protos = self.imprinter.imprint(exp, initial=True, num_prototypes=num_prototypes)
 
     def run(self):
         self.imprinter.imagefeed.feed(self.image_package_size) 
         return 1 # number of feeds used
 
+    def get_results(self):
+        return test_prototypes(self.protos)
+
+    '''
+
     def get_results(self, final=False): # Based on Mick Thomure's code - thanks! 
-
-#        print "GETTING RESULTS!"
-
         exp = self.exp
-
-        #print self.get_prototypes(self.exp)
-
         ev = exp.evaluation[0]
         model = exp.extractor.model
-
-        #if final:
-        #    loc = self.imprinter.imagefeed.image_location
-        #    image_files = []
-        #    for subdir in os.listdir(loc):
-        #        image_names = os.listdir(os.path.join(loc, subdir))
-        #        image_files.extend([os.path.join(loc, subdir, name) for name in image_names])
-        #else:
         loc = self.imprinter.imagefeed.feed_location 
         image_names = os.listdir(loc)
         image_files = [os.path.join(loc, name) for name in image_names]
-        
-        #print len(image_files)
-                    
-#        print "BUILDING IMAGES"
-#       
-        
-        print len(image_files)
-
         images = map(model.MakeState, image_files) 
         builder = Callback(BuildLayer, model, ev.layers, save_all=False)
         states = self.pool.map(builder, images)
-
-#        print "CATEGORIZING!"
-
         features = ExtractFeatures(ev.layers, states)
-
         mean = ev.results.classifier.steps[0][1].mean_
 
         print "X: {0}".format(features.shape)
@@ -68,9 +48,7 @@ class BasicMonkey:
 
         labels = ev.results.classifier.predict(features)
         classes = dict(zip(image_names, exp.corpus.class_names[labels]))
-
         actual = self.imprinter.imagefeed.get_categories()
-
         correct = 0
         count = len(classes)
 
@@ -79,7 +57,8 @@ class BasicMonkey:
                 correct += 1 
 
         return float(correct)/float(count)
-    
+   
+
     def make_exp(self, initial=False, imprint=True, prototypes=None, num_prototypes=10): 
         exp = ExperimentData()
         SetModel(exp)
@@ -105,6 +84,7 @@ class BasicMonkey:
         ComputeActivation(exp, Layer.S2, self.pool)
         TrainAndTestClassifier(exp, Layer.S2)
         return exp
+'''
 
     def get_prototypes(self, exp):
         return exp.extractor.model.s2_kernels[0]
@@ -130,13 +110,23 @@ class BasicMonkey:
                     print "Not reattempting..."
                     raise Exception, "Exp refuses to categorize one class"
                 prototypes = self.get_new_prototypes(exp, reset=False, n=(n+1)) 
-                #print "Timestep skipped."
                 self.feeds += 1
             else: 
                 raise
 
         print "Completed."
         return prototypes[0] 
+
+    def try_get_new_protos(self, exp, num=10)
+        try:
+            new_prototypes = self.get_new_prototypes(exp, num)
+        except Exception, e:
+            if "remaining feeds" in str(e):
+                return self.remaining
+            elif "refuses" in str(e):
+                return 3 
+            else:
+                raise
 
 class StaticWindowMonkey(BasicMonkey): 
     
@@ -149,26 +139,14 @@ class StaticWindowMonkey(BasicMonkey):
     def run(self, remaining=100): 
         self.remaining = remaining
         self.feeds = 1 # typical reset
-
-        try:
-            new_prototypes = self.get_new_prototypes(self.exp)
-        except Exception, e:
-            if "remaining feeds" in str(e):
-                return self.remaining
-            elif "refuses" in str(e):
-                return 3 
-            else:
-                raise
-            
-        current_prototypes = self.get_prototypes(self.exp)
-        prototypes = [ new_prototypes + current_prototypes ] 
+        
+        prototypes = [ try_get_new_protos(self.exp) + get_prototypes(self.exp) ] 
         if self.window_size is not None and len(prototypes) > self.window_size:
             prototypes = prototypes[-self.window_size:] 
 
-        self.exp = self.set_prototypes(self.exp, prototypes)
+        self.prototypes = prototypes
 
         print "Done."
-        #print self.feeds
         return self.feeds 
 
        
@@ -181,8 +159,6 @@ class GeneticMonkey(BasicMonkey):
         self.exp = self.make_exp(initial=True)
                 
     def run(self):
-#        print "RUNNING!"
-        
         self.feeds = 1
         keyword, argument = self.instructions.pop(0).split()
         times = int(argument) 
@@ -198,25 +174,20 @@ class GeneticMonkey(BasicMonkey):
                     prototypes.pop()
         elif keyword == "af":
             try:
-                new_prototypes = self.get_new_prototypes(self.exp, num=times)
+                new_prototypes = self.try_get_new_protos(self.exp, num=times)
                 if new_prototypes is not None:
-                    prototypes = [ numpy.concatenate((new_prototypes, prototypes)) ] # TODO REPLACE WITH ABOVE SYNTAX
+                    prototypes = [ new_prototypes + prototypes ] 
             except:
                 pass
         elif keyword == "al":
             try:
-                new_prototypes = self.get_new_prototypes(self.exp, num=times)
+                new_prototypes = self.try_get_new_protos(self.exp, num=times)
                 if new_prototypes is not None:
-                    prototypes = [ numpy.concatenate((prototypes, new_prototypes)) ]
+                    prototypes = [ prototypes + new_prototypes ] 
             except:
                 pass
 
-#        print "SETTING PROTOTYPES!"
-        try:
-            self.exp = self.set_prototypes(self.exp, prototypes) # put in DOR - that if this fails, will revert to old prototype results 
-        except:
-            pass
-
+        self.prototypes = prototypes
         return self.feeds
 
 
