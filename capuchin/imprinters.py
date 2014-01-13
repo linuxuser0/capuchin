@@ -18,10 +18,10 @@ class Imprinter:
         self.layers = "S2"
         self.pool = MakePool('s')
         
-    def imprint(self, prototypes=None, initial=False, num_prototypes=None) 
+    def imprint(self, prototypes=None, initial=False, num_prototypes=None):
         """Im#prints and returns a set of visual cells given a series of images."""
 
-        num_prototypes = self.num_prototypes if num_prototypes is None
+        num_prototypes = self.num_prototypes if num_prototypes is None else num_prototypes
         corpus = self.initial_location if initial else self.sorted_location
         exp = make_exp(prototypes, corpus=corpus)
 
