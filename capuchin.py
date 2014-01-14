@@ -34,6 +34,7 @@ def basic(times, num_prototypes):
     monkey = monkeys.BasicMonkey(imprinter, IMAGE_PACKAGE_SIZE, num_prototypes=num_prototypes)
 
     for _ in range(times):
+        monkey.run()
         return monkey.get_results() 
         
 def twiddle(max_size, delta): # Algorithm introduced by Sebastian Thrun (genius) on Udacity - thanks!

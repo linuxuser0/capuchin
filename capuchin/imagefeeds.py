@@ -16,6 +16,7 @@ class ImageFeed:
 
     def feed(self, image_package_size, reset=True): 
         """Get image_package_size images from each subdirectory in image_location and return them.""" 
+        print "FED LIKE A CAT"
         image_subdirs = self._get_random_image_sample(image_package_size)
         images = self.transfer_images(image_subdirs, self.feed_location, folders=True, reset=reset) 
         return image_subdirs 
