@@ -4,7 +4,6 @@ from glimpse.pools import *
 # functions below based off of Mick Thomure's code - thanks!
 
 TEST_SORTED = "test/test_sorted"
-LAYER = Layer.C2
 
 def make_exp(protos, corpus=None):
     exp = ExperimentData()
@@ -33,13 +32,13 @@ def get_accuracy(pred, act):
 def classify_images(protos, images, labels): # make use right classifier size when called to categorize! PUT IN OBSERVATIONS
     model = make_model(protos)
     clf = train_classifier(model, images, labels)
-    labels = clf.predict(get_features(images=images))
+    labels = clf.predict(get_features(images, model))
     classes = get_class_names(labels) 
     return dict(zip(images, classes))
 
 
 def train_classifier(model, images, labels): 
-    return FitClassifier(get_features(images=images), labels) 
+    return FitClassifier(get_features(images, model), labels) 
 
 
 def get_labels(mask=None, corpus=TEST_SORTED):
@@ -64,12 +63,13 @@ def get_image_labels(mask, corpus=TEST_SORTED):
     return dict(zip(get_images(mask), get_labels(mask)))
 
 
-def get_features(images):
+def get_features(images, model):
     pool = MakePool()
     images = map(model.MakeState, images)
-    builder = Callback(BuildLayer, model, LAYER, save_all=False)
+    builder = Callback(BuildLayer, model, model.LayerClass.S2, save_all=False)
     states = pool.map(builder, images)
-    features = ExtractFeatures(layer, states)
+    features = ExtractFeatures(model.LayerClass.S2, states)
+    return features
 
 def get_class_names(labels, corpus=TEST_SORTED):
     exp = ExperimentData()
@@ -78,14 +78,17 @@ def get_class_names(labels, corpus=TEST_SORTED):
 
 def make_model(protos):
     model = Model()
-    model.s2_kernels = [protos]
+    if isinstance(protos, list):
+        model.s2_kernels = protos
+    else:
+        model.s2_kernels = [protos]
     return model
 
 
 def get_classes(model, images):
     pool = MakePool()
     images = map(model.MakeState, paths)
-    builder = Callback(BuildLayer, model, ev.layers, save_all=False)
+    builder = Callback(BuildLayer, model, model.LayerClass.S2, save_all=False)
     states = self.pool.map(builder, images)
-    features = ExtractFeatures(ev.layers, states)
+    features = ExtractFeatures(model.LayerClass.S2, states)
     
