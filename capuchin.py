@@ -230,15 +230,18 @@ def try_monkey_run(m, tries=0):
 
 ###################################################################################
 
-points = []
-for n in range(5, 10): #61
-    print "TESTING NUM_PROTOTYPES {0}".format(n)
-    b = basic(10, n)
-    print b
-    points.append(b)
+for n in range(5, 6): #61
+    points = []
+    for _ in range(1, 10):
+        print "TESTING NUM_PROTOTYPES {0}".format(n)
+        b = basic(10, n)
+        print b
+        points.append(b)
+    print "AVERAGE: {0}".format(float(sum(points))/float(len(points)))
 
-average = float(sum(points))/float(len(points)) 
-print "FINAL VALUE: {0}".format(average)
+
+#average = float(sum(points))/float(len(points)) 
+#print "FINAL VALUE: {0}".format(average)
 
 #for _ in range(0, 20):
 #    print "TWIDDLE {0}".format(_)
