@@ -3,7 +3,7 @@ from glimpse.models import *
 from glimpse.pools import *
 # functions below based off of Mick Thomure's code - thanks!
 
-TEST_FEED = "test/test_feed"
+TEST_SORTED = "test/test_sorted"
 LAYER = Layer.C2
 
 def make_exp(protos, corpus=None):
@@ -14,11 +14,11 @@ def make_exp(protos, corpus=None):
     return exp
 
 
-def test_prototypes(protos):
+def test_prototypes(protos): # FIX FOR TEST_FEED
     # Assumes images are in test_feed.
-    mask = ChooseTrainingSet(labels, train_size=0.5)
-    predictions = classify_images(protos, get_images(mask))
-    return get_accuracy(predictions, get_image_labels(~mask))
+    mask = ChooseTrainingSet(get_labels(corpus=TEST_SORTED), train_size=0.5)
+    predictions = classify_images(protos, get_images(mask=mask), get_labels(mask=mask))
+    return get_accuracy(predictions, get_image_labels(mask=~mask))
 
 
 def get_accuracy(pred, act):
@@ -30,47 +30,51 @@ def get_accuracy(pred, act):
     return float(correct)/float(len(pred))
 
 
-def classify_images(protos, images):
+def classify_images(protos, images, labels): # make use right classifier size when called to categorize! PUT IN OBSERVATIONS
     model = make_model(protos)
-    pool = MakePool()
-    clf = train_classifier(model, pool, images)
+    clf = train_classifier(model, images, labels)
     labels = clf.predict(get_features(images=images))
     classes = get_class_names(labels) 
     return dict(zip(images, classes))
 
 
-def train_classifier(model, pool, images): 
-    return FitClassifier(get_features(images=images), get_labels()) 
+def train_classifier(model, images, labels): 
+    return FitClassifier(get_features(images=images), labels) 
 
 
-def get_labels(corpus=TEST_FEED):
+def get_labels(mask=None, corpus=TEST_SORTED):
     exp = ExperimentData()
     SetCorpus(exp, corpus)
-    return exp.corpus.labels[mask]
+    if mask is not None:
+        return exp.corpus.labels[mask]
+    else:
+        return exp.corpus.labels
 
 
-def get_images(mask, corpus=TEST_FEED):
+def get_images(mask=None, corpus=TEST_SORTED):
     exp = ExperimentData()
     SetCorpus(exp, corpus)
-    return exp.corpus.paths[mask]
+    if mask is not None:
+        return exp.corpus.paths[mask]
+    else:
+        return exp.corpus.paths
 
 
-def get_image_labels(mask, corpus=TEST_FEED):
+def get_image_labels(mask, corpus=TEST_SORTED):
     return dict(zip(get_images(mask), get_labels(mask)))
 
 
-def get_features(images=None, corpus=TEST_FEED):
-    images = images if images is not None else get_images(corpus) 
+def get_features(images):
+    pool = MakePool()
     images = map(model.MakeState, images)
     builder = Callback(BuildLayer, model, LAYER, save_all=False)
     states = pool.map(builder, images)
     features = ExtractFeatures(layer, states)
 
-def get_class_names(labels, corpus=TEST_FEED):
+def get_class_names(labels, corpus=TEST_SORTED):
     exp = ExperimentData()
     SetCorpus(exp, corpus)
     return exp.corpus.class_names[labels]
-    
 
 def make_model(protos):
     model = Model()
@@ -79,6 +83,7 @@ def make_model(protos):
 
 
 def get_classes(model, images):
+    pool = MakePool()
     images = map(model.MakeState, paths)
     builder = Callback(BuildLayer, model, ev.layers, save_all=False)
     states = self.pool.map(builder, images)
