@@ -31,14 +31,16 @@ def get_imagefeed():
 
 def basic(times, num_prototypes): 
     imprinter = get_imprinter()
-    print "MAKING MONKEY"
     monkey = monkeys.BasicMonkey(imprinter, IMAGE_PACKAGE_SIZE, num_prototypes=num_prototypes)
-    print "RESULTS:"
-    print monkey.get_results() 
-
+    data = []
     for _ in range(times):
         monkey.run()
-        return monkey.get_results() #TODO RETURN LIST NOT SINGLE
+        m = monkey.get_results()
+        data.append(m)
+        print "RESULT: {0}".format(m)
+
+    average = float(sum(data))/float(len(data))
+    print "AVERAGE: {0}".format(average)
         
 def twiddle(max_size, delta): # Algorithm introduced by Sebastian Thrun (genius) on Udacity - thanks!
     print "Begin twiddle."
@@ -255,16 +257,12 @@ def try_monkey_run(m, tries=0):
 '''
 
 ###################################################################################
-'''
-for n in range(5, 6): #61
-    points = []
-    for _ in range(1, 10):
-        print "TESTING NUM_PROTOTYPES {0}".format(n)
-        b = basic(10, n)
-        print b
-        points.append(b)
-    print "AVERAGE: {0}".format(float(sum(points))/float(len(points)))
-'''
+
+for n in range(2, 51): # 51
+    print "TESTING NUM_PROTOTYPES {0}".format(n)
+    basic(10, n)
+
+print "----------------------------------------------------------------------"
 
 #average = float(sum(points))/float(len(points)) 
 #print "FINAL VALUE: {0}".format(average)
@@ -273,9 +271,9 @@ for n in range(5, 6): #61
 #    print "TWIDDLE {0}".format(_)
 #    twiddle(50, 10)
 
-#for n in range(2, 3): 
-#    t = test_window(n)
-#    print "Round {0}: {1}".format(n, t)
+for n in range(2, 51): # 51 
+    t = test_window(n)
+    print "Round {0}: {1}".format(n, t)
     
 #twiddle(10, 2) 
-genetic(2)
+#genetic(2)

@@ -4,6 +4,7 @@ from glimpse.pools import *
 # functions below based off of Mick Thomure's code - thanks!
 
 TEST_FEED = "test/test_feed"
+pool = MakePool()
 
 def make_exp(protos, corpus=None):
     exp = ExperimentData()
@@ -23,9 +24,9 @@ def test_prototypes(protos): # FIX FOR TEST_FEED
 
 def get_accuracy(pred, act):
     correct = 0
-    print pred
-    print "----"
-    print act
+#    print pred
+#    print "----"
+#    print act
     for key in pred.keys():
         if pred[key] == act[key]:
             correct += 1
@@ -68,7 +69,6 @@ def get_image_labels(mask, corpus=TEST_FEED):
 
 
 def get_features(images, model):
-    pool = MakePool()
     images = map(model.MakeState, images)
     builder = Callback(BuildLayer, model, model.LayerClass.C2, save_all=False)
     states = pool.map(builder, images)
@@ -82,7 +82,7 @@ def get_class_names(labels, corpus=TEST_FEED):
 
 def make_model(protos):
     model = Model()
-    print protos
+    #print protos
     if isinstance(protos, list):
         model.s2_kernels = protos
     else:
@@ -91,7 +91,6 @@ def make_model(protos):
 
 
 def get_classes(model, images):
-    pool = MakePool()
     images = map(model.MakeState, paths)
     builder = Callback(BuildLayer, model, model.LayerClass.C2, save_all=False)
     states = self.pool.map(builder, images)
