@@ -37,6 +37,7 @@ def classify_images(protos, train_images, train_labels, test_images): # make use
     model = make_model(protos)
     clf = train_classifier(model, train_images, train_labels)
     labels = clf.predict(get_features(test_images, model))
+    print labels
     classes = get_class_names(labels) 
     return dict(zip(test_images, classes))
 

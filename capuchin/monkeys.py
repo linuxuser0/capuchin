@@ -90,15 +90,15 @@ class BasicMonkey:
     def get_prototypes(self, exp):
         return exp.extractor.model.s2_kernels[0]
 
-    def get_new_prototypes(self, exp, images=5, reset=True, num=10, n=0):
+    def get_new_prototypes(self, protos, images=5, reset=True, num=10, n=0):
         print "Getting new prototypes..."
         try:
             print "Feeding..."
             self.imprinter.imagefeed.feed(images, reset=reset) 
             print "Categorizing..."
-            self.imprinter.categorize(exp)
+            self.imprinter.categorize(protos)
             print "Imprinting..."
-            prototypes = self.imprinter.imprint(exp, num_prototypes=num)
+            new_protos = self.imprinter.imprint(prototypes=protos, num_prototypes=num)
 
         except Exception, e:
             if self.feeds >= self.remaining:
@@ -110,17 +110,40 @@ class BasicMonkey:
                 if n == 2:
                     print "Not reattempting..."
                     raise Exception, "Exp refuses to categorize one class"
-                prototypes = self.get_new_prototypes(exp, reset=False, n=(n+1)) 
+                prototypes = self.get_new_prototypes(protos, reset=False, n=(n+1)) 
                 self.feeds += 1
             else: 
                 raise
 
         print "Completed."
-        return prototypes[0] 
-
-    def try_get_new_protos(self, exp, num=10):
+        return new_protos[0] 
+'''
+    def try_get_new_protos(self, protos, num=10):
         try:
-            new_prototypes = self.get_new_prototypes(exp, num)
+            new_prototypes = self.get_new_prototypes(protos, num)
+        except Exception, e:
+            if "remaining feeds" in str(e):
+                return self.remaining
+            elif "refuses" in str(e):
+                return 3 
+            else:
+                raise
+'''
+
+class StaticWindowMonkey(BasicMonkey): 
+    
+    def __init__(self, imprinter, window_size=None): 
+        self.imprinter = imprinter 
+        self.window_size = window_size
+        self.pool = MakePool('s')
+        self.protos = self.imprinter.imprint(initial=True, num_prototypes=10)
+       
+    def run(self, remaining=100): 
+        self.remaining = remaining
+        self.feeds = 1 # typical reset
+
+        try:
+            new_prototypes = self.get_new_prototypes(self.protos, 10)
         except Exception, e:
             if "remaining feeds" in str(e):
                 return self.remaining
@@ -129,22 +152,11 @@ class BasicMonkey:
             else:
                 raise
 
-class StaticWindowMonkey(BasicMonkey): 
-    
-    def __init__(self, imprinter, window_size=None): 
-        self.imprinter = imprinter 
-        self.window_size = window_size
-        self.pool = MakePool('s')
-                
-    def run(self, remaining=100): 
-        self.remaining = remaining
-        self.feeds = 1 # typical reset
-        
-        prototypes = [ try_get_new_protos(self.exp) + get_prototypes(self.exp) ] 
+        prototypes = [ new_prototypes + self.get_prototypes(self.protos) ] 
         if self.window_size is not None and len(prototypes) > self.window_size:
             prototypes = prototypes[-self.window_size:] 
 
-        self.prototypes = prototypes
+        self.protos = prototypes
 
         print "Done."
         return self.feeds 

@@ -28,22 +28,24 @@ class ImageFeed:
             #print "CLEARING {0}".format(location)
             self._reset_directory(location, folders)
 
-        #print "TRANFERING to {0}".format(location)
+        print "TRANFERING to {0}".format(location)
 
         for image in image_subdirs:
 
             if folders:
-                destination = os.path.join(location, image_subdirs[image], image) 
+                destination = os.path.join(location, image_subdirs[image], os.path.basename(image)) 
             else:
-                destination = os.path.join(location, image)
+                destination = os.path.join(location, os.path.basename(image))
              
             if predicted:
                 for subdir in os.listdir(location):
-                    image_file = os.path.join(self.image_location, subdir, image)
+                    image_file = os.path.join(self.image_location, subdir, os.path.basename(image))
                     try: 
+                        print image_file, destination
                         shutil.copyfile(image_file, destination)
                         break
                     except Exception:
+                        print "WHOA NELLY"
                         pass
 
             else:

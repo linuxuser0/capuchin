@@ -31,8 +31,11 @@ class Imprinter:
     def get_prototypes(self, exp): 
        return exp.extractor.model.s2_kernels
 
-    def categorize(self, exp):
-        categories = classify_images()
+    def categorize(self, protos):
+        mask = ChooseTrainingSet(get_labels(corpus=TEST_FEED), train_size=0.5)
+        categories = classify_images(protos, get_images(mask=mask), get_labels(mask=mask), get_images(mask=~mask))
+        print "CATEGORIES:"
+        print categories
         self.imagefeed._reset_directory(self.sorted_location)
         self.imagefeed.transfer_images(categories, self.sorted_location, predicted=True)
        

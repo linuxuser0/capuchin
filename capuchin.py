@@ -31,11 +31,14 @@ def get_imagefeed():
 
 def basic(times, num_prototypes): 
     imprinter = get_imprinter()
+    print "MAKING MONKEY"
     monkey = monkeys.BasicMonkey(imprinter, IMAGE_PACKAGE_SIZE, num_prototypes=num_prototypes)
+    print "RESULTS:"
+    print monkey.get_results() 
 
     for _ in range(times):
         monkey.run()
-        return monkey.get_results() 
+        return monkey.get_results() #TODO RETURN LIST NOT SINGLE
         
 def twiddle(max_size, delta): # Algorithm introduced by Sebastian Thrun (genius) on Udacity - thanks!
     print "Begin twiddle."
@@ -191,6 +194,7 @@ def test_window(window):
     monkey = make_window(window)
     values = []
     runs = 0
+    print monkey.get_results()
     while runs < 10:
         print "Run {0} begun.".format(runs)
         try:
@@ -203,6 +207,8 @@ def test_window(window):
             if "sample" in error:
                 print "Imprinter - swapped."
                 monkey.imprinter = get_imprinter()
+            else:
+                raise
 
     return float(sum(values))/float(len(values))
 
@@ -229,7 +235,7 @@ def try_monkey_run(m, tries=0):
 '''
 
 ###################################################################################
-
+'''
 for n in range(5, 6): #61
     points = []
     for _ in range(1, 10):
@@ -238,7 +244,7 @@ for n in range(5, 6): #61
         print b
         points.append(b)
     print "AVERAGE: {0}".format(float(sum(points))/float(len(points)))
-
+'''
 
 #average = float(sum(points))/float(len(points)) 
 #print "FINAL VALUE: {0}".format(average)
@@ -246,10 +252,10 @@ for n in range(5, 6): #61
 #for _ in range(0, 20):
 #    print "TWIDDLE {0}".format(_)
 #    twiddle(50, 10)
-'''
-for n in range(2, 61): 
+
+for n in range(2, 3): 
     t = test_window(n)
     print "Round {0}: {1}".format(n, t)
-'''    
+    
 #twiddle(10, 2) 
 #genetic(5)
