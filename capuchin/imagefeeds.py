@@ -37,20 +37,23 @@ class ImageFeed:
             else:
                 destination = os.path.join(location, os.path.basename(image))
              
-            if predicted:
-                for subdir in os.listdir(location):
-                    image_file = os.path.join(self.image_location, subdir, os.path.basename(image))
-                    try: 
-                        print image_file, destination
-                        shutil.copyfile(image_file, destination)
-                        break
-                    except Exception:
-                        print "WHOA NELLY"
-                        pass
+            #if predicted:
+            for subdir in os.listdir(location):
+                image_file = os.path.join(self.image_location, subdir, os.path.basename(image))
+                try: 
+                    print image_file, destination
+                    shutil.copyfile(image_file, destination)
+                    print "{0} made it.".format(image_file)
+                    break
+                except Exception:
+                    print "WHOA NELLY {0}".format(image_file)
+                    pass
+                
+                
 
-            else:
-                image_file = os.path.join(self.image_location, image_subdirs[image], image) 
-                shutil.copyfile(image_file, destination)
+            #else:
+            #    image_file = os.path.join(self.image_location, image_subdirs[image], image) 
+            #    shutil.copyfile(image_file, destination)
 
             self.used_images.append(image)
             image_files.append(image)
