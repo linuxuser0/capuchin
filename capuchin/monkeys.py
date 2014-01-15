@@ -168,38 +168,51 @@ class GeneticMonkey(BasicMonkey):
         self.imprinter = imprinter
         self.pool = MakePool('s')
         self.instructions = instructions
-        self.exp = self.make_exp(initial=True)
+        self.protos = self.imprinter.imprint(initial=True, num_prototypes=10)
                 
-    def run(self):
+    def run(self, remaining):
+        self.remaining = remaining
         self.feeds = 1
         keyword, argument = self.instructions.pop(0).split()
         times = int(argument) 
-        prototypes = self.get_prototypes(self.exp) 
         
         if keyword == "rf":
             for n in range(times):
-                if len(prototypes) > 0:
-                    prototypes.pop(0)
+                if len(self.protos) > 0:
+                    self.protos.pop(0)
         elif keyword == "rl":
             for n in range(times):
-                if len(prototypes) > 0:
-                    prototypes.pop()
+                if len(self.protos) > 0:
+                    self.protos.pop()
         elif keyword == "af":
             try:
-                new_prototypes = self.try_get_new_protos(self.exp, num=times)
-                if new_prototypes is not None:
-                    prototypes = [ new_prototypes + prototypes ] 
-            except:
-                pass
+                new_prototypes = self.get_new_prototypes(self.protos, 10)
+            except Exception, e:
+                if "remaining feeds" in str(e):
+                    return self.remaining
+                elif "refuses" in str(e):
+                    return 3 
+                else:
+                    raise
+
+            if new_prototypes is not None:
+                self.protos = [ new_prototypes + self.protos[0] ] 
+                
+
         elif keyword == "al":
             try:
-                new_prototypes = self.try_get_new_protos(self.exp, num=times)
-                if new_prototypes is not None:
-                    prototypes = [ prototypes + new_prototypes ] 
-            except:
-                pass
+                new_prototypes = self.get_new_prototypes(self.protos, 10)
+            except Exception, e:
+                if "remaining feeds" in str(e):
+                    return self.remaining
+                elif "refuses" in str(e):
+                    return 3 
+                else:
+                    raise
 
-        self.prototypes = prototypes
+            if new_prototypes is not None:
+                self.protos = [ self.protos[0] + new_prototypes ] 
+
         return self.feeds
 
 
