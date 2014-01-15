@@ -110,7 +110,7 @@ class BasicMonkey:
                 if n == 2:
                     print "Not reattempting..."
                     raise Exception, "Exp refuses to categorize one class"
-                prototypes = self.get_new_prototypes(protos, reset=False, n=(n+1)) 
+                new_protos = self.get_new_prototypes(protos, reset=False, n=(n+1)) 
                 self.feeds += 1
             else: 
                 raise
@@ -152,7 +152,7 @@ class StaticWindowMonkey(BasicMonkey):
             else:
                 raise
 
-        prototypes = [ new_prototypes + self.get_prototypes(self.protos) ] 
+        prototypes = [ new_prototypes + self.protos[0] ] 
         if self.window_size is not None and len(prototypes) > self.window_size:
             prototypes = prototypes[-self.window_size:] 
 

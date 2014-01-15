@@ -82,6 +82,7 @@ def get_class_names(labels, corpus=TEST_FEED):
 
 def make_model(protos):
     model = Model()
+    print protos
     if isinstance(protos, list):
         model.s2_kernels = protos
     else:
