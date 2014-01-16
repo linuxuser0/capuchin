@@ -135,3 +135,15 @@ class ImageFeed:
         return predictions
 
 
+class SortedImageFeed(ImageFeed):
+    def __init__(self, image_location, feed_location):
+        self.image_locations = [ os.path.join(image_location, loc) for loc in sorted(os.listdir(image_location)) ]
+        self.used_locations = []
+        self.feed_location = feed_location
+
+    def feed():
+        images = os.listdir(location) 
+        locations = [image_locations.pop(0)]*len(images)
+        image_subdirs = dict(zip(images, location))
+        images = self.transfer_images(image_subdirs, self.feed_location, folders=True, reset=reset) 
+        return image_subdirs 
