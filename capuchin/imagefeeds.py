@@ -125,6 +125,7 @@ class ImageFeed:
 class SortedImageFeed(ImageFeed):
 
     def __init__(self, image_location, feed_location):
+        self.image_location = image_location
         self.image_locations = [ os.path.join(image_location, loc) for loc in sorted(os.listdir(image_location)) ]
         self.used_images = [] # to be compatible with "legacy" code
         self.used_locations = []
@@ -137,11 +138,12 @@ class SortedImageFeed(ImageFeed):
             shutil.rmtree(self.feed_location)
             os.makedirs(self.feed_location)
             for subdir in subdirs:
-                original =  os.path.join(location, subdir)
+                original = os.path.join(location, subdir)
                 destination = os.path.join(self.feed_location, subdir)
                 shutil.copytree(original, destination) 
         else:
             for subdir in subdirs:
+                original = os.path.join(location, subdir)
                 fullpath = os.path.join(location, subdir)
                 destination = os.path.join(self.feed_location, subdir)
                 for image in os.listdir(original):
