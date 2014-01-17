@@ -27,7 +27,7 @@ def get_imprinter():
     return imprinters.Imprinter(get_imagefeed(), INITIAL_LOCATION, SORTED_LOCATION, num_prototypes=NUM_PROTOTYPES) 
 
 def get_sorted_imagefeed():
-    return imagefeeds.SortedImageFeed(SORTED_INITIAL_LOCATION, SORTED_LOCATION)
+    return imagefeeds.SortedImageFeed(SORTED_INITIAL_LOCATION, FEED_LOCATION)
 
 def get_imagefeed():
     return imagefeeds.ImageFeed(IMAGE_LOCATION, FEED_LOCATION) 

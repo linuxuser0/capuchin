@@ -24,10 +24,7 @@ class ImageFeed:
     def transfer_images(self, image_subdirs, location, folders=True, predicted=False, reset=True):
         image_files = []
         if reset:
-            #print "CLEARING {0}".format(location)
             self._reset_directory(location, folders)
-
-        #print "TRANFERING to {0}".format(location)
 
         for image in image_subdirs:
 
@@ -35,7 +32,7 @@ class ImageFeed:
                 destination = os.path.join(location, image_subdirs[image], os.path.basename(image)) 
             else:
                 destination = os.path.join(location, os.path.basename(image))
-             
+
             #if predicted:
             for subdir in os.listdir(location):
                 image_file = os.path.join(self.image_location, subdir, os.path.basename(image))
@@ -116,6 +113,7 @@ class ImageFeed:
         try:
             shutil.rmtree(directory)
         except OSError:
+            print "Could not delete... 119"
             pass
 
         #print "DIRECTORY {0} DELETED".format(directory)
@@ -137,13 +135,26 @@ class ImageFeed:
 
 class SortedImageFeed(ImageFeed):
     def __init__(self, image_location, feed_location):
+        self.image_location = image_location
         self.image_locations = [ os.path.join(image_location, loc) for loc in sorted(os.listdir(image_location)) ]
+        self.used_images = [] # to be compatible with "legacy" code
         self.used_locations = []
         self.feed_location = feed_location
+        try:
+            shutil.rmtree(self.feed_location)
+        except OSError:
+            pass
 
-    def feed():
-        images = os.listdir(location) 
-        locations = [image_locations.pop(0)]*len(images)
-        image_subdirs = dict(zip(images, location))
-        images = self.transfer_images(image_subdirs, self.feed_location, folders=True, reset=reset) 
-        return image_subdirs 
+        os.makedirs(self.feed_location)
+
+    def feed(self):
+        location = self.image_locations.pop(0)
+        images = [ os.path.join(location, image) for image in os.listdir(location) ]
+        shutil.rmtree(self.feed_location)
+        os.makedirs(self.feed_location)
+        images = self.transfer_images(images)
+
+    def transfer_images(self, images):
+        for image in images:
+            shutil.copy(image, self.feed_location)
+
