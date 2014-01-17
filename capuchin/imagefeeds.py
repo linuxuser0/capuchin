@@ -1,7 +1,7 @@
 import os
 import shutil
 import random
-
+from config import *
 from glimpse.experiment import *
 
 class ImageFeed:
@@ -14,14 +14,15 @@ class ImageFeed:
         self.used_images = []
         self.feed_location = feed_location
 
-    def feed(self, image_package_size, reset=True): 
+    def feed(self, reset=True): 
         """Get image_package_size images from each subdirectory in image_location and return them.""" 
-        image_subdirs = self._get_random_image_sample(image_package_size)
+        image_subdirs = self._get_random_image_sample(IMAGE_PACKAGE_SIZE)
         images = self.transfer_images(image_subdirs, self.feed_location, folders=True, reset=reset) 
         return image_subdirs 
 
             
-    def transfer_images(self, image_subdirs, location, folders=True, predicted=False, reset=True):
+    def transfer_images(self, image_subdirs, location, folders=True, reset=True):
+        """Moves images from one directory to another given a dict of subdirectories."""
         image_files = []
         if reset:
             self._reset_directory(location, folders)
@@ -33,29 +34,17 @@ class ImageFeed:
             else:
                 destination = os.path.join(location, os.path.basename(image))
 
-            #if predicted:
             for subdir in os.listdir(location):
                 image_file = os.path.join(self.image_location, subdir, os.path.basename(image))
                 try: 
-                    #print image_file, destination
                     shutil.copyfile(image_file, destination)
-                    #print "{0} made it.".format(image_file)
                     break
                 except Exception:
-                    #print "WHOA NELLY {0}".format(image_file)
-                    pass
+                    pass # We've checked the wrong directory.
                 
-                
-
-            #else:
-            #    image_file = os.path.join(self.image_location, image_subdirs[image], image) 
-            #    shutil.copyfile(image_file, destination)
-
             self.used_images.append(image)
             image_files.append(image)
 
-        
-        
         return image_files
 
 
@@ -134,27 +123,20 @@ class ImageFeed:
 
 
 class SortedImageFeed(ImageFeed):
+
     def __init__(self, image_location, feed_location):
-        self.image_location = image_location
         self.image_locations = [ os.path.join(image_location, loc) for loc in sorted(os.listdir(image_location)) ]
         self.used_images = [] # to be compatible with "legacy" code
         self.used_locations = []
         self.feed_location = feed_location
-        try:
-            shutil.rmtree(self.feed_location)
-        except OSError:
-            pass
-
-        os.makedirs(self.feed_location)
 
     def feed(self):
         location = self.image_locations.pop(0)
-        images = [ os.path.join(location, image) for image in os.listdir(location) ]
+        subdirs = os.listdir(location) 
         shutil.rmtree(self.feed_location)
         os.makedirs(self.feed_location)
-        images = self.transfer_images(images)
-
-    def transfer_images(self, images):
-        for image in images:
-            shutil.copy(image, self.feed_location)
-
+        for subdir in subdirs:
+            original =  os.path.join(location, subdir)
+            destination = os.path.join(self.feed_location, subdir)
+            shutil.copytree(original, destination) 
+             

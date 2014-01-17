@@ -1,9 +1,9 @@
 from glimpse.experiment import *
 from glimpse.models import *
 from glimpse.pools import *
+from config import * 
 # functions below based off of Mick Thomure's code - thanks!
 
-TEST_FEED = "test/test_feed"
 pool = MakePool()
 
 def make_exp(protos, corpus=None):
@@ -14,9 +14,9 @@ def make_exp(protos, corpus=None):
     return exp
 
 
-def test_prototypes(protos): # FIX FOR TEST_FEED
+def test_prototypes(protos): # FIX FOR FEED_LOCATION
     # Assumes images are in test_feed.
-    mask = ChooseTrainingSet(get_labels(corpus=TEST_FEED), train_size=0.5)
+    mask = ChooseTrainingSet(get_labels(corpus=FEED_LOCATION), train_size=0.5)
     predictions = classify_images(protos, get_images(mask=mask), get_labels(mask=mask), get_images(mask=~mask))
     actual = dict(zip(get_images(~mask), get_class_names(get_labels(~mask))))
     return get_accuracy(predictions, actual) 
@@ -24,9 +24,6 @@ def test_prototypes(protos): # FIX FOR TEST_FEED
 
 def get_accuracy(pred, act):
     correct = 0
-#    print pred
-#    print "----"
-#    print act
     for key in pred.keys():
         if pred[key] == act[key]:
             correct += 1
@@ -38,7 +35,6 @@ def classify_images(protos, train_images, train_labels, test_images): # make use
     model = make_model(protos)
     clf = train_classifier(model, train_images, train_labels)
     labels = clf.predict(get_features(test_images, model))
-    print labels
     classes = get_class_names(labels) 
     return dict(zip(test_images, classes))
 
@@ -47,7 +43,7 @@ def train_classifier(model, images, labels):
     return FitClassifier(get_features(images, model), labels) 
 
 
-def get_labels(mask=None, corpus=TEST_FEED):
+def get_labels(mask=None, corpus=FEED_LOCATION):
     exp = ExperimentData()
     SetCorpus(exp, corpus)
     if mask is not None:
@@ -55,7 +51,7 @@ def get_labels(mask=None, corpus=TEST_FEED):
     else:
         return exp.corpus.labels
 
-def get_images(mask=None, corpus=TEST_FEED):
+def get_images(mask=None, corpus=FEED_LOCATION):
     exp = ExperimentData()
     SetCorpus(exp, corpus)
     if mask is not None:
@@ -64,7 +60,7 @@ def get_images(mask=None, corpus=TEST_FEED):
         return exp.corpus.paths
 
 
-def get_image_labels(mask, corpus=TEST_FEED):
+def get_image_labels(mask, corpus=FEED_LOCATION):
     return dict(zip(get_images(mask), get_labels(mask)))
 
 
@@ -75,7 +71,7 @@ def get_features(images, model):
     features = ExtractFeatures(model.LayerClass.C2, states)
     return features
 
-def get_class_names(labels, corpus=TEST_FEED):
+def get_class_names(labels, corpus=FEED_LOCATION):
     exp = ExperimentData()
     SetCorpus(exp, corpus)
     return exp.corpus.class_names[labels]
