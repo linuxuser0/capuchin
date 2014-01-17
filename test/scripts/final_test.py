@@ -50,7 +50,7 @@ def test_genetic(generations, imagefeed_getter, preset):
     best = (None, -1)
     for _ in range(generations):
         fitnesses = [get_fitness(p[:], imagefeed_getter) for p in population]
-        if max(fitnesses) > all_best[1]:
+        if max(fitnesses) > best[1]:
             best_fitness = max(fitnesses)
             best_species = dict(zip(fitnesses, population))[best_fitness]
             best = (best_species, best_fitness)
@@ -63,7 +63,7 @@ def test_genetic(generations, imagefeed_getter, preset):
     print "{0} => {1}".format(best[0], best[1])
 
 def get_fitness(string, imagefeed_getter):
-    impritner = get_imprinter(imagefeed_getter())
+    imprinter = get_imprinter(imagefeed_getter())
     monkey = monkeys.GeneticMonkey(imprinter, string)
     values = []
     runs = 0
@@ -73,7 +73,7 @@ def get_fitness(string, imagefeed_getter):
             runs += monkey.run(remaining=(10-runs))
             values.append(monkey.get_results())
         except Exception, e:
-            if sample in str(e):
+            if "sample" in str(e):
                 print "Imprinter swap."
                 monkey.imprinter = get_imprinter(imagefeed_getter())
             else:
@@ -103,7 +103,13 @@ def double_test(tester, values):
     print "---------------------------------------------"
 
 #CHECK double_test(test_baseline, PROTOTYPES)
-double_test(test_window, WINDOWS)
-test_genetic(GENERATIONS)
+#CHECK double_test(test_window, WINDOWS)
+#CHECK test_genetic(GENERATIONS, get_imagefeed, False)
+print "--------------------------------------------"
+#CHECK test_genetic(GENERATIONS, get_imagefeed, True)
+print "--------------------------------------------"
+test_genetic(GENERATIONS, get_sorted_imagefeed, False)
+print "--------------------------------------------"
+test_genetic(GENERATIONS, get_sorted_imagefeed, True)
 
 

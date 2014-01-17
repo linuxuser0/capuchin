@@ -90,6 +90,9 @@ class BasicMonkey:
 
     def get_new_prototypes(self, protos, reset=True, images=5, num=10, n=0):
         print "Getting new prototypes..."
+        if protos is None or len(protos) == 0:
+            print "Completed."
+            return protos 
         try:
             print "Feeding..."
             self.imprinter.imagefeed.feed(reset=reset) 
@@ -173,45 +176,57 @@ class GeneticMonkey(BasicMonkey):
         self.feeds = 1
         keyword, argument = self.instructions.pop(0).split()
         times = int(argument) 
-        
-        if keyword == "rf":
-            for n in range(times):
-                if len(self.protos) > 0:
-                    self.protos.pop(0)
-        elif keyword == "rl":
-            for n in range(times):
-                if len(self.protos) > 0:
-                    self.protos.pop()
-        elif keyword == "af":
-            try:
-                new_prototypes = self.get_new_prototypes(self.protos, 10)
-            except Exception, e:
-                if "remaining feeds" in str(e):
-                    return self.remaining
-                elif "refuses" in str(e):
-                    return 3 
-                else:
-                    raise
+       
+        if self.protos is not None and len(self.protos) != 0:
+            if keyword == "rf":
+                for n in range(times):
+                    if len(self.protos) > 0:
+                        self.protos.pop(0)
+            elif keyword == "rl":
+                for n in range(times):
+                    if len(self.protos) > 0:
+                        self.protos.pop()
+            elif keyword == "af":
+                try:
+                    new_prototypes = self.get_new_prototypes(self.protos, 10)
+                except Exception, e:
+                    if "remaining feeds" in str(e):
+                        return self.remaining
+                    elif "refuses" in str(e):
+                        return 3 
+                    else:
+                        raise
 
-            if new_prototypes is not None:
-                self.protos = [ new_prototypes + self.protos[0] ] 
-                
+                if new_prototypes is not None:
+                    self.protos = [ new_prototypes + self.protos[0] ] 
+                    
 
-        elif keyword == "al":
-            try:
-                new_prototypes = self.get_new_prototypes(self.protos, 10)
-            except Exception, e:
-                if "remaining feeds" in str(e):
-                    return self.remaining
-                elif "refuses" in str(e):
-                    return 3 
-                else:
-                    raise
+            elif keyword == "al":
+                try:
+                    new_prototypes = self.get_new_prototypes(self.protos, 10)
+                except Exception, e:
+                    if "remaining feeds" in str(e):
+                        return self.remaining
+                    elif "refuses" in str(e):
+                        return 3 
+                    else:
+                        raise
 
-            if new_prototypes is not None:
-                self.protos = [ self.protos[0] + new_prototypes ] 
+                if new_prototypes is not None:
+                    self.protos = [ self.protos[0] + new_prototypes ] 
 
-        return self.feeds
+            return self.feeds
+
+        return self.remaining
+
+    def get_results(self):
+        print "Getting results..."
+        print self.protos
+        if self.protos is None or len(self.protos) == 0:
+            return 0.0
+        else:
+            return test_prototypes(self.protos)
+
 
 
             

@@ -34,7 +34,6 @@ class Imprinter:
 
     def categorize(self, protos):
         mask = ChooseTrainingSet(get_labels(corpus=FEED_LOCATION), train_size=0.5)
-        print self.imagefeed.image_location
         categories = classify_images(protos, get_images(mask=mask), get_labels(mask=mask), get_images(mask=~mask))
         self.imagefeed._reset_directory(self.sorted_location)
         self.imagefeed.transfer_images(categories, self.sorted_location)
