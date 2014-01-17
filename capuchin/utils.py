@@ -47,6 +47,8 @@ def get_labels(mask=None, corpus=FEED_LOCATION):
     exp = ExperimentData()
     SetCorpus(exp, corpus)
     if mask is not None:
+        print mask
+        print exp.corpus.labels
         return exp.corpus.labels[mask]
     else:
         return exp.corpus.labels
@@ -55,6 +57,8 @@ def get_images(mask=None, corpus=FEED_LOCATION):
     exp = ExperimentData()
     SetCorpus(exp, corpus)
     if mask is not None:
+        print mask
+        print exp.corpus.labels
         return exp.corpus.paths[mask]
     else:
         return exp.corpus.paths

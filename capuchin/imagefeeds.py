@@ -130,13 +130,21 @@ class SortedImageFeed(ImageFeed):
         self.used_locations = []
         self.feed_location = feed_location
 
-    def feed(self):
+    def feed(self, reset=True):
         location = self.image_locations.pop(0)
         subdirs = os.listdir(location) 
-        shutil.rmtree(self.feed_location)
-        os.makedirs(self.feed_location)
-        for subdir in subdirs:
-            original =  os.path.join(location, subdir)
-            destination = os.path.join(self.feed_location, subdir)
-            shutil.copytree(original, destination) 
-             
+        if reset:
+            shutil.rmtree(self.feed_location)
+            os.makedirs(self.feed_location)
+            for subdir in subdirs:
+                original =  os.path.join(location, subdir)
+                destination = os.path.join(self.feed_location, subdir)
+                shutil.copytree(original, destination) 
+        else:
+            for subdir in subdirs:
+                fullpath = os.path.join(location, subdir)
+                destination = os.path.join(self.feed_location, subdir)
+                for image in os.listdir(original):
+                    imagepath = os.path.join(fullpath, image)
+                    shutil.copy(imagepath, destination)
+                

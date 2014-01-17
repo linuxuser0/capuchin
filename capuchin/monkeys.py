@@ -88,11 +88,11 @@ class BasicMonkey:
     def get_prototypes(self, exp):
         return exp.extractor.model.s2_kernels[0]
 
-    def get_new_prototypes(self, protos, images=5, reset=True, num=10, n=0):
+    def get_new_prototypes(self, protos, reset=True, images=5, num=10, n=0):
         print "Getting new prototypes..."
         try:
             print "Feeding..."
-            self.imprinter.imagefeed.feed(images, reset=reset) 
+            self.imprinter.imagefeed.feed(reset=reset) 
             print "Categorizing..."
             self.imprinter.categorize(protos)
             print "Imprinting..."

@@ -33,7 +33,7 @@ def test_window(imagefeed_getter, window_size):
                 runs += monkey.run()
                 points.append(monkey.get_results())
             except Exception, e:
-                if "sample" in error:
+                if "sample" in str(e):
                     print "Imprinter swap."
                     monkey.imprinter = get_imprinter(imagefeed_getter())
                 else:
@@ -43,7 +43,7 @@ def test_window(imagefeed_getter, window_size):
 
         print "Trial {0} finished.".format(trial)
 
-    return sum(points/float(len(points)))
+    return sum(points)/float(len(points))
 
 def test_genetic(generations, imagefeed_getter, preset):
     population = get_initial_population(preset)    

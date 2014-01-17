@@ -4,6 +4,7 @@ from glimpse.models import *
 from glimpse.pools import *
 from imagefeeds import ImageFeed 
 from utils import *
+from config import *
 
 class Imprinter:
     """A simple class that accepts an imagefeed and returns imprinted visual cells from it."""
@@ -32,12 +33,11 @@ class Imprinter:
        return exp.extractor.model.s2_kernels
 
     def categorize(self, protos):
-        mask = ChooseTrainingSet(get_labels(corpus=TEST_FEED), train_size=0.5)
+        mask = ChooseTrainingSet(get_labels(corpus=FEED_LOCATION), train_size=0.5)
+        print self.imagefeed.image_location
         categories = classify_images(protos, get_images(mask=mask), get_labels(mask=mask), get_images(mask=~mask))
-        print "CATEGORIES:"
-        print categories
         self.imagefeed._reset_directory(self.sorted_location)
-        self.imagefeed.transfer_images(categories, self.sorted_location, predicted=True)
+        self.imagefeed.transfer_images(categories, self.sorted_location)
        
     def _get_categories(self, exp): # This code based off of Mick Thomure's PredictImageClasses gist
         """exp should have a model and prototypes"""
