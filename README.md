@@ -3,7 +3,7 @@ capuchin
 
 A simple HMAX "dynamic imprinter" - made for on-the-go visual learning, based on the GLIMPSE library (https://github.com/mthomure/glimpse-project) created by Mick Thomure et al.
 
-Capuchin is the successor (with -hopefully- more success) of Monkey.
+Capuchin is the successor (with --hopefully-- more success) of Monkey.
 
 * * *
 
