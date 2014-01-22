@@ -26,79 +26,15 @@ class BasicMonkey:
     def get_results(self):
         return test_prototypes(self.protos)
 
-    '''
-
-    def get_results(self, final=False): # Based on Mick Thomure's code - thanks! 
-        exp = self.exp
-        ev = exp.evaluation[0]
-        model = exp.extractor.model
-        loc = self.imprinter.imagefeed.feed_location 
-        image_names = os.listdir(loc)
-        image_files = [os.path.join(loc, name) for name in image_names]
-        images = map(model.MakeState, image_files) 
-        builder = Callback(BuildLayer, model, ev.layers, save_all=False)
-        states = self.pool.map(builder, images)
-        features = ExtractFeatures(ev.layers, states)
-        mean = ev.results.classifier.steps[0][1].mean_
-
-        print "X: {0}".format(features.shape)
-        print "Mean: {0}".format(mean.shape)
-        print "Difference: {0}".format((features-mean).shape)
-
-        labels = ev.results.classifier.predict(features)
-        classes = dict(zip(image_names, exp.corpus.class_names[labels]))
-        actual = self.imprinter.imagefeed.get_categories()
-        correct = 0
-        count = len(classes)
-
-        for image_name in classes:
-            if classes[image_name] == actual[image_name]:
-                correct += 1 
-
-        return float(correct)/float(count)
-   
-
-    def make_exp(self, initial=False, imprint=True, prototypes=None, num_prototypes=10): 
-        exp = ExperimentData()
-        SetModel(exp)
-        if prototypes is not None:
-            SetCorpus(exp, self.imprinter.sorted_location)
-        else:
-            prototypes = self.imprinter.imprint(exp, initial=initial, num_prototypes=num_prototypes) 
-
-        exp = self.set_prototypes(exp, prototypes, initial=initial) 
-
-        return exp
-
-    def make_testing_exp(self, prototypes):
-        exp = ExperimentData()
-        SetModel(exp)
-        self.set_prototypes(exp, prototypes)
-        return exp
-
-    def set_prototypes(self, exp, prototypes, initial=False):
-        #if not initial:
-        #    SetCorpus(exp, self.imprinter.sorted_location)
-        exp.extractor.model.s2_kernels = prototypes
-        ComputeActivation(exp, Layer.S2, self.pool)
-        TrainAndTestClassifier(exp, Layer.S2)
-        return exp
-'''
-
     def get_prototypes(self, exp):
         return exp.extractor.model.s2_kernels[0]
 
     def get_new_prototypes(self, protos, reset=True, images=5, num=10, n=0):
-        print "Getting new prototypes..."
         if protos is None or len(protos) == 0:
-            print "Completed."
             return protos 
         try:
-            print "Feeding..."
             self.imprinter.imagefeed.feed(reset=reset) 
-            print "Categorizing..."
             self.imprinter.categorize(protos)
-            print "Imprinting..."
             new_protos = self.imprinter.imprint(prototypes=protos, num_prototypes=num)
 
         except Exception, e:
@@ -106,30 +42,15 @@ class BasicMonkey:
                 raise Exception, "Out of remaining feeds." 
             
             if "No images found in directory" in str(e) or "Need at least two examples of class" in str(e):
-                print "Reattempting prototypes"
-                print str(e)
                 if n == 2:
-                    print "Not reattempting..."
                     raise Exception, "Exp refuses to categorize one class"
-                new_protos = self.get_new_prototypes(protos, reset=False, n=(n+1)) 
-                self.feeds += 1
+                else:
+                    new_protos = self.get_new_prototypes(protos, reset=False, n=(n+1)) 
+                    self.feeds += 1
             else: 
                 raise
 
-        print "Completed."
         return new_protos[0] 
-'''
-    def try_get_new_protos(self, protos, num=10):
-        try:
-            new_prototypes = self.get_new_prototypes(protos, num)
-        except Exception, e:
-            if "remaining feeds" in str(e):
-                return self.remaining
-            elif "refuses" in str(e):
-                return 3 
-            else:
-                raise
-'''
 
 class StaticWindowMonkey(BasicMonkey): 
     
@@ -220,8 +141,6 @@ class GeneticMonkey(BasicMonkey):
         return self.remaining
 
     def get_results(self):
-        print "Getting results..."
-        print self.protos
         if self.protos is None or len(self.protos) == 0:
             return 0.0
         else:

@@ -9,6 +9,7 @@ pool = MakePool()
 def make_exp(protos, corpus=None):
     exp = ExperimentData()
     SetModel(exp)
+    print corpus
     if corpus:
         SetCorpus(exp, corpus)
     return exp
@@ -36,6 +37,7 @@ def classify_images(protos, train_images, train_labels, test_images): # make use
     clf = train_classifier(model, train_images, train_labels)
     labels = clf.predict(get_features(test_images, model))
     classes = get_class_names(labels) 
+    print classes
     return dict(zip(test_images, classes))
 
 
@@ -47,8 +49,8 @@ def get_labels(mask=None, corpus=FEED_LOCATION):
     exp = ExperimentData()
     SetCorpus(exp, corpus)
     if mask is not None:
-        print mask
-        print exp.corpus.labels
+        #print mask
+        #print exp.corpus.labels
         return exp.corpus.labels[mask]
     else:
         return exp.corpus.labels
@@ -57,8 +59,6 @@ def get_images(mask=None, corpus=FEED_LOCATION):
     exp = ExperimentData()
     SetCorpus(exp, corpus)
     if mask is not None:
-        print mask
-        print exp.corpus.labels
         return exp.corpus.paths[mask]
     else:
         return exp.corpus.paths
@@ -82,7 +82,6 @@ def get_class_names(labels, corpus=FEED_LOCATION):
 
 def make_model(protos):
     model = Model()
-    #print protos
     if isinstance(protos, list):
         model.s2_kernels = protos
     else:

@@ -60,8 +60,6 @@ class ImageFeed:
             subdir_unused_images = [ image for image in all_images if image not in self.used_images ]
             unused_images[subdirectory] = subdir_unused_images
 
-        #print unused_images
-
         return unused_images
     
     def _get_all_images(self):
@@ -102,11 +100,7 @@ class ImageFeed:
         try:
             shutil.rmtree(directory)
         except OSError:
-            print "Could not delete... 119"
             pass
-
-        #print "DIRECTORY {0} DELETED".format(directory)
-        #print "FOLDERS: {0}".format(folders)
 
         os.makedirs(directory)
         if folders:

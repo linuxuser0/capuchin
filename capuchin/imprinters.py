@@ -23,7 +23,7 @@ class Imprinter:
         """Imprints and returns a set of visual cells given a series of images."""
 
         num_prototypes = self.num_prototypes if num_prototypes is None else num_prototypes
-        corpus = self.initial_location if initial else self.sorted_location
+        corpus = self.initial_location if initial else self.imagefeed.feed_location
         exp = make_exp(prototypes, corpus=corpus)
 
         MakePrototypes(exp, num_prototypes, algorithm="imprint", pool=MakePool('s'))

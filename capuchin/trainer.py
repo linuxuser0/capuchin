@@ -6,15 +6,12 @@ def evaluate_monkey(times, monkey, genetic=False):
     values = []
     n = 0
     while n < times:
-#        print n
         n += monkey.run()
         if n <= times:
             results = try_get_results(monkey)
             values.append(results)
-            #print "Round {0}: {1}".format(n, results)
 
     average = float(sum(values))/float(len(values))
-    print "AVERAGE: {0}".format(average)
     return average 
 
 def try_get_results(monkey, final=False):
@@ -40,37 +37,9 @@ def basic(times, num_prototypes):
         monkey.run()
         m = monkey.get_results()
         data.append(m)
-        print "RESULT: {0}".format(m)
 
     average = float(sum(data))/float(len(data))
-    print "AVERAGE: {0}".format(average)
     return average
-        
-def twiddle(max_size, delta): # Algorithm introduced by Sebastian Thrun (genius) on Udacity - thanks!
-    print "Begin twiddle."
-    window = random.randint(1, max_size) 
-    best_accuracy = test_window(window)
-
-    while delta > 1:
-        print "Delta and window:"
-        print delta
-        print window
-        window += delta 
-        accuracy = test_window(window)
-        if accuracy > best_accuracy:
-            best_accuracy = accuracy
-            delta = int(delta * 1.1)
-        else:
-            window -= 2*delta
-            accuracy = test_window(window)
-            if accuracy > best_accuracy:
-                best_accuracy = accuracy
-                delta = int(delta * 1.1)
-            else:
-                # cry for mercy
-                window += delta
-                delta = int(delta * 0.9)
-    return window, best_accuracy
 
 def test_window(window): 
     times = 10 
@@ -88,26 +57,15 @@ def genetic(times):
     for n in range(times):
         fitnesses = [get_fitness(p[:]) for p in population]
         if max(fitnesses) > all_best_fitness:
-            print "NEW BEST SET!"
             all_best_fitness = max(fitnesses)
             all_best = population[fitnesses.index(all_best_fitness)]
 
-        print "ROUND {0}".format(n)
-        print population
-        print "FITNESSES: {0}".format(fitnesses)
-
-        print "---"
-
-        print "SCREENING"
         population = screen(population, fitnesses)
         if all_best is not None:
             population.append(all_best)
             population.append(all_best)
-        print "REPRODUCING"
         population = reproduce(population)
 
-        print "---"
-                
     print "ALL TIME BEST: {0}".format(all_best)
     print "FITNESS: {0}".format(all_best_fitness)
 
@@ -128,8 +86,6 @@ def get_initial_population(preset=True, size=3):
         population =[ ['no 1'] * 10, ['al 1'] * 9 + ['rf 2'], ['af 1'] * 8 + ['rl 1'] * 2, 
                 get_initial_population(preset=False, size=1)[0] ]
     
-    print population
-
     return population
 
 
@@ -157,17 +113,12 @@ def get_fitness(string): # modify for average!
     monkey = monkeys.GeneticMonkey(imprinter, string) 
     values = []
     runs = 0
-    print monkey.get_results()
     while runs < 10:
-        print "Run {0} begun.".format(runs)
         try:
-            print "Running!"
             runs += monkey.run(remaining=(10-runs))
-            print "Obtaining results."
             values.append(monkey.get_results())
         except Exception, e:
-            error = str(e)
-            if "sample" in error:
+            if "sample" in str(e):
                 print "Imprinter - swapped."
                 monkey.imprinter = get_imprinter()
             else:
@@ -175,46 +126,8 @@ def get_fitness(string): # modify for average!
 
     return float(sum(values))/float(len(values))
 
-
-'''
-def try_test_window(n, tries=0):
-    try:
-        t = test_window(n)
-    except Exception, e:
-        error = str(e)
-        if "Exp refuses to categorize one class" in error:
-            if tries <= MAX_TRIES:
-                print "Retrying..."
-                print "ISSUE:"
-                print error
-                tries += 1
-                t = try_test_window(n, tries=tries)
-            else:
-                print "Failed."
-                return "FAILURE"
-    
-    return t
-'''
-
 def make_window(window):
     return monkeys.StaticWindowMonkey(get_imprinter(), window)
-
-'''
-
-def evaluate_window(window):
-    times = 10
-    values = []
-    n = 0
-    while n < times:
-        print "STEP! {0} < 10".format(n)
-        t, results = test_window(window)
-
-
-    average = float(sum(values))/float(len(values))
-    print "AVERAGE: {0}".format(average)
-    return average 
-
-'''
 
 def test_window(window):
     monkey = make_window(window)
@@ -237,59 +150,3 @@ def test_window(window):
                 raise
 
     return float(sum(values))/float(len(values))
-
-'''
-
-def try_monkey_run(m, tries=0):
-    try:
-        n = m.run()
-        print "Success!"
-    except Exception, e:
-        if "Exp refuses to categorize one class" in str(e) or "larger than population":
-            if tries <= MAX_TRIES:
-                print "Retrying..."
-                print str(e)
-                tries += 1
-                n = try_monkey_run(m, tries=tries)
-            else:
-                print "Failed."
-                return None
-        else:
-            raise
-    return n 
-
-'''
-
-###################################################################################
-
-#for n in range(2, 51): # 51
-#    print "TESTING NUM_PROTOTYPES {0}".format(n)
-#    basic(10, n)
-
-#print "----------------------------------------------------------------------"
-
-#points = []
-#for _ in range(25):
-#    points.append(basic(10, 10)) # 10 times, 10 prototypes
-
-#print float(sum(points))/float(len(points))
-
-#average = float(sum(points))/float(len(points)) 
-#print "FINAL VALUE: {0}".format(average)
-
-#for _ in range(0, 20):
-#    print "TWIDDLE {0}".format(_)
-#    twiddle(50, 10)
-#
-#for n in [8, 16, 30, 42]:  
-#    points = []
-#    for _ in range(25):
-#        t = test_window(n)
-#        points.append(t)
-#        print "POINT {0} for {1}: {2}".format(_, n, t)
-#    print "AVERAGE for {0}".format(n)
-#    print float(sum(points))/float(len(points)) 
-
-    
-#twiddle(10, 2) 
-#genetic(2)
