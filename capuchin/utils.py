@@ -6,7 +6,7 @@ from config import *
 
 pool = MakePool()
 
-def make_exp(protos, corpus=None):
+def make_exp(protos, corpus=None): # CHECK
     exp = ExperimentData()
     SetModel(exp)
     print corpus
@@ -15,7 +15,7 @@ def make_exp(protos, corpus=None):
     return exp
 
 
-def test_prototypes(protos): # FIX FOR FEED_LOCATION
+def test_prototypes(protos): # CHECK 
     # Assumes images are in test_feed.
     mask = ChooseTrainingSet(get_labels(corpus=FEED_LOCATION), train_size=0.5)
     predictions = classify_images(protos, get_images(mask=mask), get_labels(mask=mask), get_images(mask=~mask))
@@ -23,7 +23,7 @@ def test_prototypes(protos): # FIX FOR FEED_LOCATION
     return get_accuracy(predictions, actual) 
 
 
-def get_accuracy(pred, act):
+def get_accuracy(pred, act): # CHECK
     correct = 0
     for key in pred.keys():
         if pred[key] == act[key]:
@@ -32,7 +32,7 @@ def get_accuracy(pred, act):
     return float(correct)/float(len(pred))
 
 
-def classify_images(protos, train_images, train_labels, test_images): # make use right classifier size when called to categorize! PUT IN OBSERVATIONS
+def classify_images(protos, train_images, train_labels, test_images): # CHECK 
     model = make_model(protos)
     clf = train_classifier(model, train_images, train_labels)
     labels = clf.predict(get_features(test_images, model))
@@ -41,21 +41,19 @@ def classify_images(protos, train_images, train_labels, test_images): # make use
     return dict(zip(test_images, classes))
 
 
-def train_classifier(model, images, labels): 
+def train_classifier(model, images, labels): # CHECK
     return FitClassifier(get_features(images, model), labels) 
 
 
-def get_labels(mask=None, corpus=FEED_LOCATION):
+def get_labels(mask=None, corpus=FEED_LOCATION): # CHECK
     exp = ExperimentData()
     SetCorpus(exp, corpus)
     if mask is not None:
-        #print mask
-        #print exp.corpus.labels
         return exp.corpus.labels[mask]
     else:
         return exp.corpus.labels
 
-def get_images(mask=None, corpus=FEED_LOCATION):
+def get_images(mask=None, corpus=FEED_LOCATION): # CHECK
     exp = ExperimentData()
     SetCorpus(exp, corpus)
     if mask is not None:
@@ -64,23 +62,23 @@ def get_images(mask=None, corpus=FEED_LOCATION):
         return exp.corpus.paths
 
 
-def get_image_labels(mask, corpus=FEED_LOCATION):
+def get_image_labels(mask, corpus=FEED_LOCATION): # CHECK
     return dict(zip(get_images(mask), get_labels(mask)))
 
 
-def get_features(images, model):
+def get_features(images, model): # CHECK
     images = map(model.MakeState, images)
     builder = Callback(BuildLayer, model, model.LayerClass.C2, save_all=False)
     states = pool.map(builder, images)
     features = ExtractFeatures(model.LayerClass.C2, states)
     return features
 
-def get_class_names(labels, corpus=FEED_LOCATION):
+def get_class_names(labels, corpus=FEED_LOCATION): # CHECK
     exp = ExperimentData()
     SetCorpus(exp, corpus)
     return exp.corpus.class_names[labels]
 
-def make_model(protos):
+def make_model(protos): # CHECK
     model = Model()
     if isinstance(protos, list):
         model.s2_kernels = protos
@@ -89,69 +87,32 @@ def make_model(protos):
     return model
 
 
-def get_classes(model, images):
+def get_classes(model, images): # CHECK 
     images = map(model.MakeState, paths)
     builder = Callback(BuildLayer, model, model.LayerClass.C2, save_all=False)
-    states = self.pool.map(builder, images)
+    states = pool.map(builder, images)
     features = ExtractFeatures(model.LayerClass.C2, states)
 
-def transfer_images(self, image_subdirs, location, folders=True, reset=True):
-    """Moves images from one directory to another given a dict of subdirectories."""
-    image_files = []
-    if reset:
-        self._reset_directory(location, folders)
+############################# IMAGEFEED #############################
 
-    for image in image_subdirs:
-
-        if folders:
-            destination = os.path.join(location, image_subdirs[image], os.path.basename(image)) 
-        else:
-            destination = os.path.join(location, os.path.basename(image))
-
-        for subdir in os.listdir(location):
-            image_file = os.path.join(self.image_location, subdir, os.path.basename(image))
-            try: 
-                shutil.copyfile(image_file, destination)
-                break
-            except Exception:
-                pass # We've checked the wrong directory.
-            
-        self.used_images.append(image)
-        image_files.append(image)
-
-    return image_files
-
-
-def _get_unused_images(self):
+def get_unused_images(image_location, used_images): # CHECK
     """Get a dictionary of all available images which haven't been used."""
-    subdirectories = os.listdir(self.image_location)
+    subdirectories = os.listdir(image_location)
     unused_images = {} 
     
     for subdirectory in subdirectories: 
-        full_subdirectory_path = os.path.join(self.image_location, subdirectory)
+        full_subdirectory_path = os.path.join(image_location, subdirectory)
         all_files = os.listdir(full_subdirectory_path)
-        all_images = [ image for image in all_files if os.path.splitext(image)[1].lower() in self.ACCEPTED_FILETYPES ]
-        subdir_unused_images = [ image for image in all_images if image not in self.used_images ]
+        all_images = [ image for image in all_files if os.path.splitext(image)[1].lower() in ACCEPTED_FILETYPES ]
+        subdir_unused_images = [ image for image in all_images if image not in used_images ]
         unused_images[subdirectory] = subdir_unused_images
 
     return unused_images
 
-def _get_all_images(self):
-    images = {}
-    subdirectories = os.listdir(self.image_location)
-
-    for subdirectory in subdirectories:
-        full_subdirectory_path = os.path.join(self.image_location, subdirectory)
-        all_files = os.listdir(full_subdirectory_path)
-        all_images = [ image for image in all_files if os.path.splitext(image)[1].lower() in self.ACCEPTED_FILETYPES ]
-        images[subdirectory] = all_images      
-
-    return images
-
-def _get_random_image_sample(self, size):
+def get_random_image_sample(size, image_location, used_images): # CHECK
     """Gets a random sample of images of size from each subdirectory in image_location, returning a dictionary."""
     images = {}
-    unused_images = self._get_unused_images() 
+    unused_images = get_unused_images(image_location, used_images) 
     
     for subdirectory in unused_images: 
         subdir_images = random.sample(unused_images[subdirectory], size) 
@@ -160,17 +121,7 @@ def _get_random_image_sample(self, size):
 
     return images
 
-def get_categories(self):
-    categories = {}
-    for subdirectory in os.listdir(self.image_location):
-        full_path = os.path.join(self.image_location, subdirectory)
-        for image in os.listdir(full_path):
-            categories[image] = subdirectory
-
-    return categories
-        
-
-def _reset_directory(self, directory, folders=True):
+def reset_directory(directory, image_location, folders=True): # CHECK 
     try:
         shutil.rmtree(directory)
     except OSError:
@@ -178,17 +129,18 @@ def _reset_directory(self, directory, folders=True):
 
     os.makedirs(directory)
     if folders:
-        for subdir in os.listdir(self.image_location):
+        for subdir in os.listdir(image_location)
             full_path = os.path.join(directory, subdir)
             os.makedirs(full_path)
-
-def _get_predictions(self, exp, location):
+'''
+def get_predictions(exp, location): # CHECK
     SetCorpus(exp, location)  
     raw_predictions = GetPredictions(exp)
     predictions = {pred[0] : pred[2] for pred in raw_predictions}
     return predictions
+'''
 
-##################### TRAINER #####################
+##################### TRAINER ##################### ALL BELOW CHECK ###################
 
 def evaluate_monkey(times, monkey, genetic=False):  
     values = []
