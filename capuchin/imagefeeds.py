@@ -3,6 +3,7 @@ import shutil
 import random
 from glimpse.experiment import *
 from config import *
+from utils import *
 
 class ImageFeed:
     """Feeds images to feed_location to simulate a real-time image feed for Imprinter instances."""
@@ -14,12 +15,35 @@ class ImageFeed:
 
     def feed(self, reset=True): 
         """Gets IMAGE_PACKAGE_SIZE images from each subdirectory in image_location and return them.""" 
-        image_subdirs = get_random_image_sample(IMAGE_PACKAGE_SIZE, self.used_images)
+        image_subdirs = get_random_image_sample(IMAGE_PACKAGE_SIZE, self.image_location, self.used_images)
         if reset:
-            reset_directory(self.feed_location)
-        images = move_images(image_subdirs, self.feed_location, folders=True)
-        used_images.extend(images)
+            reset_directory(self.feed_location, self.image_location)
+        images = self.move_images(image_subdirs, self.feed_location, folders=True)
+        self.used_images.extend(images)
         return image_subdirs 
+
+    def move_images(self, image_subdirs, location, folders=True):
+            """Moves images from one directory to another given a dict of subdirectories."""
+            image_files = []
+
+            for image in image_subdirs:
+                if folders:
+                    destination = os.path.join(location, image_subdirs[image], os.path.basename(image)) 
+                else:
+                    destination = os.path.join(location, os.path.basename(image))
+
+                for subdir in os.listdir(location):
+                    image_file = os.path.join(self.image_location, subdir, os.path.basename(image))
+                    try: 
+                        shutil.copyfile(image_file, destination)
+                        break
+                    except Exception:
+                        pass # We've checked the wrong directory.
+                    
+                image_files.append(image)
+
+            return image_files 
+
 
 '''
     def get_categories(self):

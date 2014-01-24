@@ -25,11 +25,11 @@ class Imprinter:
         exp = make_exp(prototypes, corpus=corpus)
 
         MakePrototypes(exp, num_prototypes, algorithm="imprint", pool=MakePool('s'))
-        return self.get_prototypes(exp)
+        return get_prototypes(exp)
 
     def categorize(self, protos):
         """Given a set of prototypes, moves images from feed_location into categories in self.sorted_location"""
         mask = ChooseTrainingSet(get_labels(corpus=FEED_LOCATION), train_size=0.5)
         categories = classify_images(protos, get_images(mask=mask), get_labels(mask=mask), get_images(mask=~mask))
-        reset_directory(self.sorted_location)
-        move_images(categories, self.sorted_location)
+        reset_directory(self.sorted_location, self.imagefeed.image_location)
+        self.imagefeed.move_images(categories, self.sorted_location)

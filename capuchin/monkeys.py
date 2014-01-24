@@ -1,5 +1,5 @@
 import copy
-import numpy
+import numpy 
 import glob
 from imprinters import Imprinter
 from imagefeeds import ImageFeed
@@ -73,6 +73,9 @@ class StaticWindowMonkey(BasicMonkey):
                 raise
 
         prototypes = [ new_prototypes + self.protos[0] ] 
+        print "NP: {0}".format(type(new_prototypes))
+        print "OLD: {0}".format(type(self.protos[0]))
+        print "NOW: {0}".format(type(prototypes))
         if self.window_size is not None and len(prototypes) > self.window_size:
             prototypes = prototypes[-self.window_size:] 
 

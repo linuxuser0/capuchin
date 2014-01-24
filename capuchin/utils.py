@@ -1,7 +1,11 @@
+import random
+import os, shutil
 from glimpse.experiment import *
 from glimpse.models import *
 from glimpse.pools import *
 from config import * 
+
+
 # functions below based off of Mick Thomure's code - thanks!
 
 pool = MakePool()
@@ -80,6 +84,7 @@ def get_class_names(labels, corpus=FEED_LOCATION): # CHECK
 
 def make_model(protos): # CHECK
     model = Model()
+    print protos
     if isinstance(protos, list):
         model.s2_kernels = protos
     else:
@@ -95,27 +100,6 @@ def get_classes(model, images): # CHECK
 
 ############################# IMAGEFEED #############################
 
-def move_images(image_subdirs, location, folders=True):
-        """Moves images from one directory to another given a dict of subdirectories."""
-        image_files = []
-
-        for image in image_subdirs:
-            if folders:
-                destination = os.path.join(location, image_subdirs[image], os.path.basename(image)) 
-            else:
-                destination = os.path.join(location, os.path.basename(image))
-
-            for subdir in os.listdir(location):
-                image_file = os.path.join(self.image_location, subdir, os.path.basename(image))
-                try: 
-                    shutil.copyfile(image_file, destination)
-                    break
-                except Exception:
-                    pass # We've checked the wrong directory.
-                
-            image_files.append(image)
-
-        return image_files 
 
 def get_unused_images(image_location, used_images): # CHECK
     """Get a dictionary of all available images which haven't been used."""
@@ -151,7 +135,7 @@ def reset_directory(directory, image_location, folders=True): # CHECK
 
     os.makedirs(directory)
     if folders:
-        for subdir in os.listdir(image_location)
+        for subdir in os.listdir(image_location):
             full_path = os.path.join(directory, subdir)
             os.makedirs(full_path)
 '''
@@ -189,12 +173,6 @@ def try_get_results(monkey, final=False):
 
 def get_imprinter(imagefeed): 
     return imprinters.Imprinter(imagefeed, INITIAL_LOCATION, SORTED_LOCATION, num_prototypes=NUM_PROTOTYPES) 
-
-def get_sorted_imagefeed():
-    return imagefeeds.SortedImageFeed(SORTED_IMAGE_LOCATION, FEED_LOCATION)
-
-def get_imagefeed():
-    return imagefeeds.ImageFeed(IMAGE_LOCATION, FEED_LOCATION) 
 
 def basic(times, num_prototypes): 
     imprinter = get_imprinter()

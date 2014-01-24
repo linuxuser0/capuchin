@@ -1,22 +1,35 @@
-from trainer import *
+from capuchin.utils import *
+from capuchin.imagefeeds import * 
+from capuchin.imprinters import *
 from capuchin.monkeys import *
 
+'''
 PROTOTYPES = range(2, 21)
 WINDOWS = range(4, 61, 4)
 NUM_TRIALS = 5 
 GENERATIONS = 5 
-
 '''
+
 PROTOTYPES = range(2, 5)
 WINDOWS = range(2, 5)
 NUM_TRIALS = 2 
 GENERATIONS = 1
-'''
 
 def print_and_log(text):
     print text
     with open("final_output.log", "a") as f:
         f.write(str(text) + "\n")
+
+def get_sorted_imagefeed():
+    return SortedImageFeed(SORTED_IMAGE_LOCATION, FEED_LOCATION)
+
+def get_imagefeed():
+    return ImageFeed(IMAGE_LOCATION, FEED_LOCATION) 
+
+def get_imprinter(imagefeed): 
+    return Imprinter(imagefeed, INITIAL_LOCATION, SORTED_LOCATION, num_prototypes=NUM_PROTOTYPES) 
+
+####################################################################################################################
 
 def test_baseline(imagefeed_getter, num_prototypes):
     points = []
@@ -130,7 +143,7 @@ def single_test(tester, values):
 
     print_and_log("---------------------------------------------")
 
-#single_test(test_baseline, PROTOTYPES)
+# CHECK double_test(test_baseline, PROTOTYPES)
 double_test(test_window, WINDOWS)
 test_genetic(GENERATIONS, get_imagefeed, False)
 print_and_log("--------------------------------------------")
