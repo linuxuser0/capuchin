@@ -95,6 +95,28 @@ def get_classes(model, images): # CHECK
 
 ############################# IMAGEFEED #############################
 
+def move_images(image_subdirs, location, folders=True):
+        """Moves images from one directory to another given a dict of subdirectories."""
+        image_files = []
+
+        for image in image_subdirs:
+            if folders:
+                destination = os.path.join(location, image_subdirs[image], os.path.basename(image)) 
+            else:
+                destination = os.path.join(location, os.path.basename(image))
+
+            for subdir in os.listdir(location):
+                image_file = os.path.join(self.image_location, subdir, os.path.basename(image))
+                try: 
+                    shutil.copyfile(image_file, destination)
+                    break
+                except Exception:
+                    pass # We've checked the wrong directory.
+                
+            image_files.append(image)
+
+        return image_files 
+
 def get_unused_images(image_location, used_images): # CHECK
     """Get a dictionary of all available images which haven't been used."""
     subdirectories = os.listdir(image_location)
@@ -139,6 +161,11 @@ def get_predictions(exp, location): # CHECK
     predictions = {pred[0] : pred[2] for pred in raw_predictions}
     return predictions
 '''
+
+#################### MONKEYS ######################
+
+def get_prototypes(exp):
+    return exp.extractor.model.s2_kernels[0]
 
 ##################### TRAINER ##################### ALL BELOW CHECK ###################
 

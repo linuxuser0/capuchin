@@ -10,9 +10,7 @@ from utils import *
 """A collection of classes which utilize Imprinter instances to dynamically adapt HMAX models."""
 
 class BasicMonkey:
-
     """Uses initial imprinting to evaluate images. Rather simple."""
-
     def __init__(self, imprinter, num_prototypes):
         self.imprinter = imprinter
         self.num_prototypes = num_prototypes
@@ -24,10 +22,10 @@ class BasicMonkey:
         return 1 # number of feeds used
 
     def get_results(self):
-        return test_prototypes(self.protos)
-
-    def get_prototypes(self, exp):
-        return exp.extractor.model.s2_kernels[0]
+        if self.protos is None or len(self.protos) == 0:
+            return 0.0
+        else:
+            return test_prototypes(self.protos)
 
     def get_new_prototypes(self, protos, reset=True, images=5, num=10, n=0):
         if protos is None or len(protos) == 0:
@@ -139,16 +137,4 @@ class GeneticMonkey(BasicMonkey):
             return self.feeds
 
         return self.remaining
-
-    def get_results(self):
-        if self.protos is None or len(self.protos) == 0:
-            return 0.0
-        else:
-            return test_prototypes(self.protos)
-
-
-
-            
-        
-        
 

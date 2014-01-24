@@ -15,9 +15,13 @@ class ImageFeed:
     def feed(self, reset=True): 
         """Gets IMAGE_PACKAGE_SIZE images from each subdirectory in image_location and return them.""" 
         image_subdirs = get_random_image_sample(IMAGE_PACKAGE_SIZE, self.used_images)
-        images = transfer_images(image_subdirs, self.feed_location, folders=True, reset=reset) 
+        if reset:
+            reset_directory(self.feed_location)
+        images = move_images(image_subdirs, self.feed_location, folders=True)
+        used_images.extend(images)
         return image_subdirs 
 
+'''
     def get_categories(self):
         categories = {}
         for subdirectory in os.listdir(self.image_location):
@@ -26,31 +30,7 @@ class ImageFeed:
                 categories[image] = subdirectory
 
         return categories
-
-    def transfer_images(self, image_subdirs, location, folders=True, reset=True): # TODO MAKE RESET EXTERNAL, remove SELF
-        """Moves images from one directory to another given a dict of subdirectories."""
-        image_files = []
-        if reset:
-            reset_directory(location, folders)
-
-        for image in image_subdirs:
-            if folders:
-                destination = os.path.join(location, image_subdirs[image], os.path.basename(image)) 
-            else:
-                destination = os.path.join(location, os.path.basename(image))
-
-            for subdir in os.listdir(location):
-                image_file = os.path.join(self.image_location, subdir, os.path.basename(image))
-                try: 
-                    shutil.copyfile(image_file, destination)
-                    break
-                except Exception:
-                    pass # We've checked the wrong directory.
-                
-            self.used_images.append(image)
-            image_files.append(image)
-
-        return image_files 
+'''
 
 class SortedImageFeed(ImageFeed):
 
