@@ -48,7 +48,7 @@ class BasicMonkey:
             else: 
                 raise
 
-        return new_protos[0] 
+        return new_protos 
 
 class StaticWindowMonkey(BasicMonkey): 
     
@@ -72,10 +72,12 @@ class StaticWindowMonkey(BasicMonkey):
             else:
                 raise
 
-        prototypes = [ new_prototypes + self.protos[0] ] 
-        print "NP: {0}".format(type(new_prototypes))
-        print "OLD: {0}".format(type(self.protos[0]))
-        print "NOW: {0}".format(type(prototypes))
+        #print "PROTOTYPES: {0}".format(self.protos)
+        #print "shape[0]: {0}".format(self.protos[0].shape)
+        prototypes = numpy.concatenate((new_prototypes, self.protos))
+        #print "NP: {0}".format(type(new_prototypes[0].shape))
+        #print "OLD: {0}".format(type(self.protos[0].shape))
+        #print "RESULT: {0}".format(prototypes[0].shape)
         if self.window_size is not None and len(prototypes) > self.window_size:
             prototypes = prototypes[-self.window_size:] 
 
@@ -85,7 +87,7 @@ class StaticWindowMonkey(BasicMonkey):
         return self.feeds 
 
        
-class GeneticMonkey(BasicMonkey):  
+class GeneticMonkey(BasicMonkey): # FIX TO BELOW 
 
     def __init__(self, imprinter, instructions):
         self.imprinter = imprinter
