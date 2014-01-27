@@ -72,12 +72,7 @@ class StaticWindowMonkey(BasicMonkey):
             else:
                 raise
 
-        #print "PROTOTYPES: {0}".format(self.protos)
-        #print "shape[0]: {0}".format(self.protos[0].shape)
         prototypes = numpy.concatenate((new_prototypes, self.protos))
-        #print "NP: {0}".format(type(new_prototypes[0].shape))
-        #print "OLD: {0}".format(type(self.protos[0].shape))
-        #print "RESULT: {0}".format(prototypes[0].shape)
         if self.window_size is not None and len(prototypes) > self.window_size:
             prototypes = prototypes[-self.window_size:] 
 
@@ -103,13 +98,9 @@ class GeneticMonkey(BasicMonkey): # FIX TO BELOW
        
         if self.protos is not None and len(self.protos) != 0:
             if keyword == "rf":
-                for n in range(times):
-                    if len(self.protos) > 0:
-                        self.protos.pop(0)
+                self.protos = self.protos[times:] 
             elif keyword == "rl":
-                for n in range(times):
-                    if len(self.protos) > 0:
-                        self.protos.pop()
+                self.protos = self.protos[:-times]
             elif keyword == "af":
                 try:
                     new_prototypes = self.get_new_prototypes(self.protos, 10)
@@ -122,7 +113,7 @@ class GeneticMonkey(BasicMonkey): # FIX TO BELOW
                         raise
 
                 if new_prototypes is not None:
-                    self.protos = [ new_prototypes + self.protos[0] ] 
+                    self.protos = numpy.concatenate((new_prototypes, self.protos))
                     
 
             elif keyword == "al":
@@ -137,7 +128,7 @@ class GeneticMonkey(BasicMonkey): # FIX TO BELOW
                         raise
 
                 if new_prototypes is not None:
-                    self.protos = [ self.protos[0] + new_prototypes ] 
+                    self.protos = numpy.concatenate((self.protos, new_prototypes))
 
             return self.feeds
 

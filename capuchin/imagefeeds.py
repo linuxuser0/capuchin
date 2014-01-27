@@ -64,8 +64,10 @@ class SortedImageFeed(ImageFeed):
         self.used_images = [] # to be compatible with "legacy" code
         self.used_locations = []
         self.feed_location = feed_location
+        print "Good to meet you."
 
     def feed(self, reset=True):
+        print "Here's some food for thought."
         location = self.image_locations.pop(0)
         subdirs = os.listdir(location) 
         if reset:

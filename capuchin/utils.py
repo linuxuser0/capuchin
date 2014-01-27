@@ -13,7 +13,6 @@ pool = MakePool()
 def make_exp(protos, corpus=None): # CHECK
     exp = ExperimentData()
     SetModel(exp)
-    print corpus
     if corpus:
         SetCorpus(exp, corpus)
     return exp
@@ -41,7 +40,6 @@ def classify_images(protos, train_images, train_labels, test_images): # CHECK
     clf = train_classifier(model, train_images, train_labels)
     labels = clf.predict(get_features(test_images, model))
     classes = get_class_names(labels) 
-    print classes
     return dict(zip(test_images, classes))
 
 
@@ -84,7 +82,6 @@ def get_class_names(labels, corpus=FEED_LOCATION): # CHECK
 
 def make_model(protos): # CHECK
     model = Model()
-    print protos
     if isinstance(protos, list):
         model.s2_kernels = protos
     else:

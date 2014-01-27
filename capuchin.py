@@ -3,17 +3,17 @@ from capuchin.imagefeeds import *
 from capuchin.imprinters import *
 from capuchin.monkeys import *
 
-'''
-PROTOTYPES = range(2, 21)
+PROTOTYPES = range(2, 31)
 WINDOWS = range(4, 61, 4)
 NUM_TRIALS = 5 
 GENERATIONS = 5 
-'''
 
+'''
 PROTOTYPES = range(2, 5)
 WINDOWS = range(2, 5)
 NUM_TRIALS = 2 
-GENERATIONS = 1
+GENERATIONS = 2
+'''
 
 def print_and_log(text):
     print text
@@ -55,9 +55,11 @@ def test_window(imagefeed_getter, window_size):
         monkey = StaticWindowMonkey(imprinter, window_size)
         while runs < 10:
             try:
-                runs += monkey.run()
+                remaining = 10 - runs
+                runs += monkey.run(remaining)
                 points.append(monkey.get_results())
-                print points[-1]
+                print_and_log(points[-1])
+                print "runs: {0}".format(runs)
             except Exception, e:
                 if "sample" in str(e):
                     print_and_log("Imprinter swap.")
@@ -65,7 +67,7 @@ def test_window(imagefeed_getter, window_size):
                 else:
                     raise
 
-            #print "Run {0} finished".format(runs)
+            print "Run {0} finished".format(runs)
 
         print_and_log("Trial {0}/{1} finished for window size {2}/{3}.".format(trial, NUM_TRIALS, window_size, len(WINDOWS)))
         print_and_log("RESULTS: {0}".format(sum(points)/float(len(points))))
@@ -94,7 +96,7 @@ def test_genetic(generations, imagefeed_getter, preset):
 
 def get_fitness(string, imagefeed_getter):
     imprinter = get_imprinter(imagefeed_getter())
-    monkey = monkeys.GeneticMonkey(imprinter, string)
+    monkey = GeneticMonkey(imprinter, string)
     values = []
     runs = 0
     for _ in range(NUM_TRIALS):
@@ -143,8 +145,9 @@ def single_test(tester, values):
 
     print_and_log("---------------------------------------------")
 
-# CHECK double_test(test_baseline, PROTOTYPES)
-double_test(test_window, WINDOWS)
+#double_test(test_baseline, PROTOTYPES)
+#double_test(test_window, WINDOWS)
+
 test_genetic(GENERATIONS, get_imagefeed, False)
 print_and_log("--------------------------------------------")
 test_genetic(GENERATIONS, get_imagefeed, True)
@@ -152,4 +155,3 @@ print_and_log("--------------------------------------------")
 test_genetic(GENERATIONS, get_sorted_imagefeed, False)
 print_and_log("--------------------------------------------")
 test_genetic(GENERATIONS, get_sorted_imagefeed, True)
-
