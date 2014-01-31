@@ -125,6 +125,7 @@ def double_test(tester, values):
     print_and_log("AVERAGE: {0}".format(sum(points)/float(len(points))))
 
     print_and_log("----------------------------------------------")
+    print "PART B"
 
     points = []
     for num in values:
@@ -145,13 +146,20 @@ def single_test(tester, values):
 
     print_and_log("---------------------------------------------")
 
-#double_test(test_baseline, PROTOTYPES)
-#double_test(test_window, WINDOWS)
+print_and_log("TEST ONE")
+double_test(test_baseline, PROTOTYPES)
+print_and_log("TEST TWO")
+double_test(test_window, WINDOWS)
 
+print_and_log("TEST THREE")
 test_genetic(GENERATIONS, get_imagefeed, False)
 print_and_log("--------------------------------------------")
+print_and_log("TEST FOUR")
 test_genetic(GENERATIONS, get_imagefeed, True)
 print_and_log("--------------------------------------------")
+print_and_log("TEST FIVE")
 test_genetic(GENERATIONS, get_sorted_imagefeed, False)
 print_and_log("--------------------------------------------")
+print_and_log("FINAL TEST (SIX)")
 test_genetic(GENERATIONS, get_sorted_imagefeed, True)
+
