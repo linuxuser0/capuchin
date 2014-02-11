@@ -25,9 +25,9 @@ class BasicMonkey:
         if self.protos is None or len(self.protos) == 0:
             return 0.0
         else:
-            return test_prototypes(self.protos)
+            return test_prototypes(self.protos, self.imprinter.imagefeed.feed_location)
 
-    def get_new_prototypes(self, protos, reset=True, images=5, num=10, n=0):
+    def get_new_prototypes(self, protos, reset=True, num=30, n=0):
         if protos is None or len(protos) == 0:
             return protos 
         try:
@@ -56,14 +56,14 @@ class StaticWindowMonkey(BasicMonkey):
         self.imprinter = imprinter 
         self.window_size = window_size
         self.pool = MakePool('s')
-        self.protos = self.imprinter.imprint(initial=True, num_prototypes=10)
+        self.protos = self.imprinter.imprint(initial=True, num_prototypes=30)
        
     def run(self, remaining=100): 
         self.remaining = remaining
         self.feeds = 1 # typical reset
 
         try:
-            new_prototypes = self.get_new_prototypes(self.protos, 10)
+            new_prototypes = self.get_new_prototypes(self.protos)
         except Exception, e:
             if "remaining feeds" in str(e):
                 return self.remaining
@@ -88,7 +88,7 @@ class GeneticMonkey(BasicMonkey): # FIX TO BELOW
         self.imprinter = imprinter
         self.pool = MakePool('s')
         self.instructions = instructions
-        self.protos = self.imprinter.imprint(initial=True, num_prototypes=10)
+        self.protos = self.imprinter.imprint(initial=True, num_prototypes=30)
                 
     def run(self, remaining):
         self.remaining = remaining
@@ -103,7 +103,7 @@ class GeneticMonkey(BasicMonkey): # FIX TO BELOW
                 self.protos = self.protos[:-times]
             elif keyword == "af":
                 try:
-                    new_prototypes = self.get_new_prototypes(self.protos, 10)
+                    new_prototypes = self.get_new_prototypes(self.protos)
                 except Exception, e:
                     if "remaining feeds" in str(e):
                         return self.remaining
@@ -118,7 +118,7 @@ class GeneticMonkey(BasicMonkey): # FIX TO BELOW
 
             elif keyword == "al":
                 try:
-                    new_prototypes = self.get_new_prototypes(self.protos, 10)
+                    new_prototypes = self.get_new_prototypes(self.protos)
                 except Exception, e:
                     if "remaining feeds" in str(e):
                         return self.remaining

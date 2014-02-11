@@ -8,14 +8,18 @@ from utils import *
 class ImageFeed:
     """Feeds images to feed_location to simulate a real-time image feed for Imprinter instances."""
 
-    def __init__(self, image_location, feed_location):
+    def __init__(self, image_location, feed_location, reuse=False):
         self.image_location = image_location 
         self.used_images = []
         self.feed_location = feed_location
+        self.reuse = reuse
 
     def feed(self, reset=True): 
         """Gets IMAGE_PACKAGE_SIZE images from each subdirectory in image_location and return them.""" 
-        image_subdirs = get_random_image_sample(IMAGE_PACKAGE_SIZE, self.image_location, self.used_images)
+        if self.reuse:
+            image_subdirs = get_random_image_sample(IMAGE_PACKAGE_SIZE, self.image_location, [])
+        else:
+            image_subdirs = get_random_image_sample(IMAGE_PACKAGE_SIZE, self.image_location, self.used_images)
         if reset:
             reset_directory(self.feed_location, self.image_location)
         images = self.move_images(image_subdirs, self.feed_location, folders=True)

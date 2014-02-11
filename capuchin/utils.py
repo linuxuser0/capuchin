@@ -4,6 +4,9 @@ from glimpse.experiment import *
 from glimpse.models import *
 from glimpse.pools import *
 from config import * 
+from capuchin.imagefeeds import *
+from capuchin.imprinters import *
+from capuchin.monkeys import *
 
 
 # functions below based off of Mick Thomure's code - thanks!
@@ -18,28 +21,32 @@ def make_exp(protos, corpus=None): # CHECK
     return exp
 
 
-def test_prototypes(protos): # CHECK 
-    # Assumes images are in test_feed.
-    mask = ChooseTrainingSet(get_labels(corpus=FEED_LOCATION), train_size=0.5)
-    predictions = classify_images(protos, get_images(mask=mask), get_labels(mask=mask), get_images(mask=~mask))
-    actual = dict(zip(get_images(~mask), get_class_names(get_labels(~mask))))
+def test_prototypes(protos, feed_location): # CHECK 
+    print "FL: {0}".format(feed_location)
+    mask = ChooseTrainingSet(get_labels(corpus=feed_location), train_size=0.5)
+    predictions = classify_images(protos, get_images(feed_location, mask=mask), 
+            get_labels(feed_location, mask=mask), get_images(feed_location, mask=~mask), feed_location)
+    actual = dict(zip(get_images(feed_location, ~mask), get_class_names(feed_location, get_labels(feed_location, ~mask))))
     return get_accuracy(predictions, actual) 
 
 
-def get_accuracy(pred, act): # CHECK
+def get_accuracy(pred, act): # CHECK 
     correct = 0
     for key in pred.keys():
+        print pred[key]
+        print act[key]
+        print "-----"
         if pred[key] == act[key]:
             correct += 1
 
     return float(correct)/float(len(pred))
 
 
-def classify_images(protos, train_images, train_labels, test_images): # CHECK 
+def classify_images(protos, train_images, train_labels, test_images, feed_location): # CHECK 
     model = make_model(protos)
     clf = train_classifier(model, train_images, train_labels)
     labels = clf.predict(get_features(test_images, model))
-    classes = get_class_names(labels) 
+    classes = get_class_names(feed_location, labels) 
     return dict(zip(test_images, classes))
 
 
@@ -47,7 +54,7 @@ def train_classifier(model, images, labels): # CHECK
     return FitClassifier(get_features(images, model), labels) 
 
 
-def get_labels(mask=None, corpus=FEED_LOCATION): # CHECK
+def get_labels(corpus, mask=None):
     exp = ExperimentData()
     SetCorpus(exp, corpus)
     if mask is not None:
@@ -55,7 +62,7 @@ def get_labels(mask=None, corpus=FEED_LOCATION): # CHECK
     else:
         return exp.corpus.labels
 
-def get_images(mask=None, corpus=FEED_LOCATION): # CHECK
+def get_images(corpus, mask=None):
     exp = ExperimentData()
     SetCorpus(exp, corpus)
     if mask is not None:
@@ -64,7 +71,7 @@ def get_images(mask=None, corpus=FEED_LOCATION): # CHECK
         return exp.corpus.paths
 
 
-def get_image_labels(mask, corpus=FEED_LOCATION): # CHECK
+def get_image_labels(corpus, mask):
     return dict(zip(get_images(mask), get_labels(mask)))
 
 
@@ -75,7 +82,7 @@ def get_features(images, model): # CHECK
     features = ExtractFeatures(model.LayerClass.C2, states)
     return features
 
-def get_class_names(labels, corpus=FEED_LOCATION): # CHECK
+def get_class_names(corpus, labels):
     exp = ExperimentData()
     SetCorpus(exp, corpus)
     return exp.corpus.class_names[labels]
@@ -118,6 +125,7 @@ def get_random_image_sample(size, image_location, used_images): # CHECK
     unused_images = get_unused_images(image_location, used_images) 
     
     for subdirectory in unused_images: 
+        print len(unused_images[subdirectory]), size
         subdir_images = random.sample(unused_images[subdirectory], size) 
         for image in subdir_images:
             images[image] = subdirectory 
@@ -309,10 +317,10 @@ def get_imprinter(imagefeed):
 
 ####################################################################################################################
 
-def test_baseline(imagefeed_getter, num_prototypes):
+def test_baseline(imagefeed_getter, num_prototypes, times=10):
     points = []
     for trial in range(NUM_TRIALS):
-        for _ in range(10):
+        for _ in range(times):
             imagefeed = imagefeed_getter()
             imprinter = get_imprinter(imagefeed)
             monkey = BasicMonkey(imprinter, num_prototypes=num_prototypes)  
@@ -377,7 +385,7 @@ def get_fitness(string, imagefeed_getter):
     monkey = GeneticMonkey(imprinter, string)
     values = []
     runs = 0
-    for _ in range(NUM_TRIALS):
+    for _ in range(10):
         while runs < 10:
             #print "Run {0} begins!".format(runs)
             try:
@@ -393,6 +401,7 @@ def get_fitness(string, imagefeed_getter):
         return sum(values)/float(len(values))
 
 
+'''
 def double_test(tester, values):
     points = []
     for num in values:
@@ -423,5 +432,4 @@ def single_test(tester, values):
     print_and_log(sum(points)/float(len(points)))
 
     print_and_log("---------------------------------------------")
-
-
+'''
